@@ -55,6 +55,19 @@ const verify = (token) => {
   } catch { return null; }
 };
 const readDB = () => { try { return JSON.parse(fs.readFileSync(DB, "utf8")); } catch { return []; } };
+/* Dashboard/token vacancy write ko durable Google Sheet (Apps Script bridge) me bhi mirror karo.
+   Render ka /tmp datastore restart/redeploy par khali ho jata hai; Sheet hamesha rahti hai.
+   Env: AVAILABILITY_SYNC_URL = Apps Script /exec URL, AVAILABILITY_TOKEN = sync token. */
+function syncAVtoSheet(rec) {
+  const u = String(process.env.AVAILABILITY_SYNC_URL || "");
+  const tk = String(process.env.AVAILABILITY_TOKEN || "");
+  if (!u || !tk || !rec) return;
+  const body = JSON.stringify({ token: tk, vacant: rec.vacant, source: String(rec.source || "dashboard").slice(0, 40) });
+  try {
+    Promise.resolve(fetch(u, { method: "POST", headers: { "Content-Type": "application/json" }, body }))
+      .then(() => {}, () => {});
+  } catch (e) { /* fire-and-forget */ }
+}
 const readAV = () => { try { return JSON.parse(fs.readFileSync(AV, "utf8")); } catch { return null; } };
 const writeAV = (obj) => {
   const tmp = AV + ".tmp";
@@ -212,6 +225,7 @@ const server = http.createServer(async (req, res) => {
         note: String((jb.json || {}).note || "").slice(0, 200),
       };
       writeAV(rec);
+      syncAVtoSheet(rec);
       return send(res, 200, { ok: true, availability: rec });
     }
     if (p === "/api/stats" && req.method === "GET") {
