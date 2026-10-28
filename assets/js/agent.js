@@ -26,7 +26,7 @@
 
   const T = {
     agentName:   { en: "Maya Sahayak", hi: "माया सहायक" },
-    role:        { en: "Hotel sales assistant · online · v15", hi: "होटल सहायक · ऑनलाइन · v15" },
+    role:        { en: "Hotel sales assistant · online · v17", hi: "होटल सहायक · ऑनलाइन · v17" },
     open:        { en: "Chat with us", hi: "बात कीजिए" },
     close:       { en: "Close chat", hi: "चैट बंद करें" },
     placeholder: { en: "Type your question…", hi: "अपना सवाल लिखिए…" },
@@ -163,7 +163,7 @@
     { id: "vacancy",   en: ["vacant", "vacancy", "free room", "room available", "rooms available", "any room available", "availability", "room mil jayega"], hi: ["खाली", "वैकेंसी", "कमरा मिल जयega", "कमरा मिलेगा", "रूम खाली", "जगह खाली"] },
     { id: "roomprice", en: ["rate", "rates", "price", "prices", "charge", "charges", "cost", "kitna", "kitne"], hi: ["दाम", "कीमत", "किराया", "कितना", "कितने", "चार्ज"] },
     { id: "rooms",     en: ["room", "rooms", "stay", "night", "accommodation"], hi: ["कमरा", "कमरे", "रुकना", "ठहरना", "रात"] },
-    { id: "menu",      en: ["menu", "food", "eat", "dinner", "lunch", "breakfast", "dish", "thali", "paneer", "veg items"], hi: ["मेनू", "खाना", "खाने", "व्यंजन", "थाली", "पनीर", "नाश्ता", "डिनर", "लंच"] },
+    { id: "menu",      en: ["menu", "food", "eat", "dinner", "lunch", "breakfast", "dish", "thali", "paneer", "veg items", "khana", "khane", "khaana", "khao", "food menu", "what to eat", "kya milega"], hi: ["मेनू", "खाना", "खाने", "व्यंजन", "थाली", "पनीर", "नाश्ता", "डिनर", "लंच"] },
     { id: "veg",       en: ["pure veg", "vegetarian", "non veg", "nonveg", "egg", "alcohol", "jain"], hi: ["शाकाहारी", "नॉनवेज", "अंडा", "शराब", "जैन", "शुद्ध"] },
     { id: "hours",     en: ["open", "hours", "timing", "time", "when", "24"], hi: ["समय", "टाइम", "कब", "खुला", "बंद"] },
     { id: "location",  en: ["where", "address", "location", "direction", "how to reach", "map", "pin"], hi: ["कहाँ", "कहां", "पता", "लोकेशन", "रास्ता", "नक्शा", "एड्रेस"] },
@@ -198,21 +198,31 @@
       { label: lang === "hi" ? "होटल को कॉल करें" : "Call the hotel", href: "tel:+919950501306" },
     ];
     const CFG0 = window.AGENT_CONFIG || {};
-    const url = CFG0.availabilityUrl || (CFG0.api ? CFG0.api.replace(/\/$/, "") + "/api/availability" : "");
-    if (!url) {
+    const urls = [];
+    if (CFG0.availabilityUrl) urls.push(CFG0.availabilityUrl);
+    if (CFG0.api) urls.push(CFG0.api.replace(/\/$/, "") + "/api/availability");
+    if (!urls.length) {
       bot(lang === "hi"
         ? "लाइव वैकेंसी मेरे पास नहीं है — फ्रंट डेस्क 24×7 खुली है, कॉल/व्हाट्सऐप पर तुरंत पक्की जानकारी मिल जाएगी:"
         : "I don't have live vacancy right now — the front desk is open 24×7 and will confirm instantly on call/WhatsApp:", chips);
       return;
     }
-    let av = null;
+    let av = null, bestAge = Infinity;
     try {
-      const r = await fetch(url);
-      const j = await r.json();
-      if (j && j.ok) av = j.availability;
+      const ctl = typeof AbortController !== "undefined" ? new AbortController() : null;
+      const to = ctl ? setTimeout(() => ctl.abort(), 9000) : 0;
+      const results = await Promise.allSettled(urls.map((u) => fetch(u, ctl ? { signal: ctl.signal } : {}).then((r) => r.json())));
+      if (ctl) clearTimeout(to);
+      for (const res of results) {
+        if (!res || res.status !== "fulfilled" || !res.value) continue;
+        const j = res.value;
+        const a = (j.ok && j.availability) || (j.vacant ? j : null);
+        if (!a || !a.vacant || !a.updatedAt) continue;
+        const age = Date.now() - new Date(a.updatedAt).getTime();
+        if (age >= 0 && age < 24 * 3600 * 1000 && age < bestAge) { bestAge = age; av = a; }
+      }
     } catch (e) { av = null; }
-    const fresh = av && av.updatedAt && (Date.now() - new Date(av.updatedAt).getTime()) < 24 * 3600 * 1000;
-    if (!fresh) {
+    if (!av) {
       bot(lang === "hi"
         ? "आज की वैकेंसी अभी अपडेट नहीं है — फ्रंट डेस्क 24×7 खुली है, कॉल/व्हाट्सऐप पर तुरंत बता देंगे:"
         : "Today's vacancy isn't updated yet — the front desk is open 24×7 and will confirm instantly on call/WhatsApp:", chips);
@@ -296,11 +306,15 @@
   async function saveEnquiry(payload) {
     if (!window.AGENT_CONFIG.api) return { mode: "whatsapp-only" };
     try {
+      const ctl = typeof AbortController !== "undefined" ? new AbortController() : null;
+      const to = ctl ? setTimeout(() => ctl.abort(), 10000) : null;
       const res = await fetch(window.AGENT_CONFIG.api.replace(/\/$/, "") + "/api/enquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
+        signal: ctl ? ctl.signal : undefined,
       });
+      if (to) clearTimeout(to);
       if (!res.ok) throw new Error("HTTP " + res.status);
       return { mode: "saved", data: await res.json() };
     } catch (e) {
@@ -399,11 +413,10 @@
     const summary =
       `👤 Name: ${s.name}\n📞 Mobile: ${s.phone}\n📋 Topic: ${s.note || topic || "General enquiry"}`;
     const waMsg = `Namaste! 🙏 Website enquiry (Maya Sahayak bot se) — Shri Maha Maya Hotel, Pallu\n${summary}`;
-    const res = await saveEnquiry({ name: s.name, phone: s.phone, type: s.type || "general", lang, source: "website-agent", details: summary });
-    if (res.mode === "saved") bot(t("sentOk"), actions(waMsg));
-    else if (res.mode === "failed") bot(t("sendFail") + "\n" + summary, actions(waMsg));
-    else bot(t("sentWaOnly") + "\n" + summary, actions(waMsg));
+    bot((lang === "hi" ? "Bas ek tap aur! 👇 WhatsApp message tayyar hai — bhej dijiye, hotel ko turant mil jayega:\n" : "One tap to go! 👇 Your WhatsApp message is ready — send it and the hotel gets it instantly:\n") + summary, actions(waMsg));
     flow = null; draft = {};
+    saveEnquiry({ name: s.name, phone: s.phone, type: s.type || "general", lang, source: "website-agent", details: summary })
+      .then((res) => { if (res.mode === "saved") bot(lang === "hi" ? "✅ Dashboard me bhi save ho gaya." : "✅ Also saved to the hotel dashboard."); });
     setTimeout(defaultChips, 800);
   }
   const recChips = () => [
@@ -418,7 +431,8 @@
   }
   function startBooking() {
     flow = { id: "booking", step: "room" }; draft = { type: "room" };
-    bot(t("bkRoom"), KB.rooms.map((r) => ({
+    bot(t("bkRoom"));
+    setChips(KB.rooms.map((r) => ({
       label: `${lang === "hi" ? r.nameHi : r.name} · ₹${r.price.toLocaleString("en-IN")}`, send: "ROOM:" + r.id,
     })));
   }
@@ -535,12 +549,22 @@
     const s = draft;
     const summary = `👤 Name: ${s.name}\n📞 Mobile: ${s.phone}\n🍽 Order:\n${cartLines("en")}\n💰 Total: ₹${cartTotal().toLocaleString("en-IN")}\n📦 Parcel/takeaway (no home delivery)`;
     const waMsg = `Namaste! 🙏 Food order (Maya Sahayak bot se) — Shri Maha Maya Restaurant, Pallu\n${summary}`;
-    const res = await saveEnquiry({ name: s.name, phone: s.phone, type: "food", lang, source: "website-agent", details: summary });
-    if (res.mode === "saved") bot(t("sentOk"), actions(waMsg));
-    else if (res.mode === "failed") bot(t("sendFail") + "\n" + summary, actions(waMsg));
-    else bot(t("sentWaOnly") + "\n" + summary, actions(waMsg));
+    bot((lang === "hi" ? "Order tayyar! 👇 WhatsApp message bhej dijiye — restaurant ko turant mil jayega:\n" : "Order ready! 👇 Send this WhatsApp message — the restaurant gets it instantly:\n") + summary, actions(waMsg));
+    flow = null; draft = {};
+    saveEnquiry({ name: s.name, phone: s.phone, type: "food", lang, source: "website-agent", details: summary })
+      .then((res) => { if (res.mode === "saved") bot(lang === "hi" ? "✅ Dashboard me bhi save ho gaya." : "✅ Also saved to the hotel dashboard."); });
+    setTimeout(defaultChips, 800);
+  }
+
+  function finishBooking() {
+    const s = draft;
+    const summary = `👤 Name: ${s.name}\n📞 Mobile: ${s.phone}\n🛏 Room: ${s.roomName || "-"}\n📅 Dates: ${s.dates || "-"}\n Guests: ${s.guests || "-"}`;
+    const wa = `Namaste! 🙏 Room booking request (Maya Sahayak bot se) — Shri Maha Maya Hotel, Pallu\n${summary}`;
+    bot((lang === "hi" ? "Booking request tayyar! 👇 WhatsApp message bhej dijiye — front desk turant confirm karega:\n" : "Booking request ready! 👇 Send this WhatsApp message — the front desk will confirm quickly:\n") + summary, actions(wa));
     flow = null; draft = {};
     setTimeout(defaultChips, 800);
+    saveEnquiry({ name: s.name, phone: s.phone, type: "room", lang, source: "website-agent", details: summary })
+      .then((res) => { if (res.mode === "saved") bot(lang === "hi" ? "✅ Dashboard me bhi save ho gaya." : "✅ Also saved to the hotel dashboard."); });
   }
 
   /* ---------- master handler ---------- */
@@ -765,5 +789,5 @@
     if (opened && !msgs.children.length) addMsg("bot", t("greeting"));
   });
 
-  window.SMM_AGENT = { open: openPanel, handle, version: "15" };
+  window.SMM_AGENT = { open: openPanel, handle, version: "16" };
 })();
