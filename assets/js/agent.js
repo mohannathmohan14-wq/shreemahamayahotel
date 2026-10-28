@@ -26,7 +26,8 @@
 
   const T = {
     agentName:   { en: "Maya Sahayak", hi: "माया सहायक" },
-    role:        { en: "Hotel sales assistant · online · v17", hi: "होटल सहायक · ऑनलाइन · v17" },
+    role:        { en: "Hotel sales assistant · online · v18", hi: "होटल सहायक · ऑनलाइन · v18" },
+    fabLabel:    { en: "Hotel Assistance", hi: "सहायता" },
     open:        { en: "Chat with us", hi: "बात कीजिए" },
     close:       { en: "Close chat", hi: "चैट बंद करें" },
     placeholder: { en: "Type your question…", hi: "अपना सवाल लिखिए…" },
@@ -325,10 +326,13 @@
   /* ================= UI ================= */
   const wrap = document.createElement("div");
   wrap.innerHTML = `
-  <button class="agent-fab" id="agent-fab" aria-label="${t("open")}" aria-expanded="false">
-    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M21 12a8 8 0 0 1-8 8H4l2.2-2.6A8 8 0 1 1 21 12z"/><path d="M8.5 11h7M8.5 14h4.5"/></svg>
-    <span class="agent-fab-dot" aria-hidden="true"></span>
-  </button>
+  <div class="agent-fabwrap">
+    <button class="agent-fab" id="agent-fab" aria-label="${t("open")}" aria-expanded="false">
+      <img class="agent-fab-ava" src="images/maya-avatar.webp" alt="" width="58" height="58" decoding="async">
+      <span class="agent-fab-dot" aria-hidden="true"></span>
+    </button>
+    <span class="agent-fab-label" id="agent-fab-label">${t("fabLabel")}</span>
+  </div>
   <section class="agent-panel" id="agent-panel" role="dialog" aria-label="${t("agentName")}" hidden>
     <header class="agent-head">
       <span class="agent-ava" aria-hidden="true">म</span>
@@ -786,8 +790,10 @@
     input.placeholder = t("placeholder");
     document.getElementById("agent-status").textContent = t("role");
     fab.setAttribute("aria-label", t("open"));
+    const fl = document.getElementById("agent-fab-label");
+    if (fl) fl.textContent = t("fabLabel");
     if (opened && !msgs.children.length) addMsg("bot", t("greeting"));
   });
 
-  window.SMM_AGENT = { open: openPanel, handle, version: "16" };
+  window.SMM_AGENT = { open: openPanel, handle, version: "18" };
 })();
