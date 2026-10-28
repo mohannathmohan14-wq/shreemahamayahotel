@@ -68,6 +68,31 @@ function syncAVtoSheet(rec) {
       .then(() => {}, () => {});
   } catch (e) { /* fire-and-forget */ }
 }
+/* Nayi enquiry ki turant Telegram notification (owner tak). Fire-and-forget, zero-dep.
+   Env: TELEGRAM_BOT_TOKEN (BotFather se), TELEGRAM_CHAT_ID (owner ki chat id);
+   optional TELEGRAM_API_BASE (sirf local test ke liye). */
+function notifyTelegram(row) {
+  const tok = String(process.env.TELEGRAM_BOT_TOKEN || "");
+  const chat = String(process.env.TELEGRAM_CHAT_ID || "");
+  if (!tok || !chat || !row) return;
+  const base = String(process.env.TELEGRAM_API_BASE || "https://api.telegram.org");
+  const digits = String(row.phone || "").replace(/\D/g, "").slice(-10);
+  const lines = [
+    "🏨 Nayi enquiry — Shri Maha Maya Hotel",
+    "Type: " + (row.type || "?") + "  ·  Lang: " + (row.lang || "en") + "  ·  Source: " + (row.source || "web"),
+    "👤 Name: " + (row.name || "-"),
+    "📞 Mobile: " + (row.phone || "-"),
+  ];
+  if (row.details) lines.push("📝 " + String(row.details).slice(0, 400));
+  lines.push("🕒 " + (row.created || new Date().toISOString()));
+  if (/^[6-9]\d{9}$/.test(digits)) lines.push("💬 Reply on WhatsApp: https://wa.me/91" + digits);
+  lines.push("⚠️ Booking confirm tabhi jab hotel staff confirm kare.");
+  const body = JSON.stringify({ chat_id: chat, text: lines.join("\n") });
+  try {
+    Promise.resolve(fetch(base + "/bot" + tok + "/sendMessage", { method: "POST", headers: { "Content-Type": "application/json" }, body }))
+      .then(() => {}, () => {});
+  } catch (e) { /* fire-and-forget */ }
+}
 const readAV = () => { try { return JSON.parse(fs.readFileSync(AV, "utf8")); } catch { return null; } };
 const writeAV = (obj) => {
   const tmp = AV + ".tmp";
@@ -158,6 +183,7 @@ const server = http.createServer(async (req, res) => {
       const rows = readDB();
       const row = Object.assign({ id: crypto.randomUUID(), created: new Date().toISOString(), status: "pending", ip: sha(ipOf(req)).slice(0, 12) }, v.clean);
       rows.push(row); writeDB(rows);
+      notifyTelegram(row);
       return send(res, 201, { ok: true, id: row.id, status: row.status, note: "Enquiry received. Booking/order is confirmed ONLY after hotel staff confirms." });
     }
 
