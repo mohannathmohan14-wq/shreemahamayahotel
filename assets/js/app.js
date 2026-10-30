@@ -685,7 +685,7 @@ syncDots();
 document.getElementById("booking-form").addEventListener("submit", (e) => {
   e.preventDefault();
   const f = e.target;
-  const v = (id) => f.querySelector(id).value.trim();
+  const v = (id) => { const el = f.querySelector(id); return el ? el.value.trim() : ""; };
   const errEl = document.getElementById("form-err");
   const fail = (key) => {
     if (errEl) { errEl.textContent = I18N[key] ? I18N[key][lang] : key; errEl.hidden = false; }
@@ -699,7 +699,6 @@ document.getElementById("booking-form").addEventListener("submit", (e) => {
     "Namaste! 🙏 New booking enquiry — Shri Maha Maya Hotel, Pallu",
     "👤 Name: " + (v("#f-name") || "-"),
     "📞 Phone: " + (v("#f-phone") || "-"),
-    "📧 Email: " + (v("#f-email") || "-"),
     "🗓 Check-in: " + (v("#f-checkin") || "-"),
     "🗓 Check-out: " + (v("#f-checkout") || "-"),
     "👥 Guests: " + (v("#f-guests") || "-") + " · Rooms: " + (v("#f-rooms") || "1"),
@@ -708,6 +707,24 @@ document.getElementById("booking-form").addEventListener("submit", (e) => {
   if (msg) lines.push("📝 " + msg);
   const waUrl = WA_BASE + encodeURIComponent(lines.join("\n"));
   const w = window.open(waUrl, "_blank");
+  /* enquiry dashboard + Telegram me bhi pahuche (background, fire-and-forget) */
+  try {
+    const api = (window.AGENT_CONFIG && window.AGENT_CONFIG.api) || "";
+    if (api) {
+      const ctl = typeof AbortController !== "undefined" ? new AbortController() : null;
+      const to = ctl ? setTimeout(() => ctl.abort(), 10000) : 0;
+      fetch(api.replace(/\/$/, "") + "/api/enquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: v("#f-name"), phone: v("#f-phone"), type: "room",
+          lang: lang === "hi" ? "hi" : "en", source: "web-form",
+          details: lines.slice(3).join(" | ").slice(0, 900),
+        }),
+        signal: ctl ? ctl.signal : undefined,
+      }).then(() => clearTimeout(to), () => clearTimeout(to));
+    }
+  } catch (e) { /* WhatsApp flow kabhi na ruke */ }
   if (!w) {  /* popup blocked — give a direct tap link instead of losing the enquiry */
     if (errEl) {
       errEl.innerHTML = "";
