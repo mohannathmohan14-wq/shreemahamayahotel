@@ -328,8 +328,10 @@ let ticking = false;
 function parallax() {
   if (reduced || window.innerWidth < 920) { pBands.forEach((b) => (b.style.transform = "translateY(0)")); return; }
   const vh = window.innerHeight;
-  pBands.forEach((b) => {
-    const r = b.parentElement.getBoundingClientRect();
+  /* pehle SAARE layout reads, phir SAARE writes — forced reflow se bachaav */
+  const rects = pBands.map((b) => b.parentElement.getBoundingClientRect());
+  pBands.forEach((b, i) => {
+    const r = rects[i];
     const off = (r.top + r.height / 2 - vh / 2) * -0.12 * parseFloat(b.dataset.parallax || 1);
     b.style.transform = `translate3d(0, ${off.toFixed(1)}px, 0)`;
   });
@@ -375,8 +377,9 @@ function renderMenu() {
     btn.classList.toggle("active", id === activeMenuTab);
     menuTabsWrap.appendChild(btn);
 
+    if (id !== activeMenuTab) return;   /* sirf active tab render — DOM + main-thread time bachaav */
     const panel = document.createElement("div");
-    panel.className = "food-tab" + (id === activeMenuTab ? " active" : "");
+    panel.className = "food-tab active";
     panel.id = id;
 
     const halfTag = (tb, d) => {

@@ -26,8 +26,11 @@
 
   const T = {
     agentName:   { en: "Maya Sahayak", hi: "माया सहायक" },
-    role:        { en: "Hotel sales assistant · online · v18", hi: "होटल सहायक · ऑनलाइन · v18" },
+    role:        { en: "Hotel sales assistant · online · v20", hi: "होटल सहायक · ऑनलाइन · v20" },
     fabLabel:    { en: "Hotel Assistance", hi: "सहायता" },
+    bkWhen:      { en: "When, and for how many? One line is fine — e.g. \"5 Nov to 6 Nov, 2 people\".", hi: "कब और कितने लोग? एक लाइन में लिखिए — जैसे \"5 नव से 6 नव, 2 लोग\"।" },
+    bkContact:   { en: "Perfect. Now your name and mobile in one line — e.g. \"Ram 9876543210\".", hi: "बढ़िया। अब नाम और मोबाइल एक लाइन में — जैसे \"Ram 9876543210\"।" },
+    ordCat:      { en: "Pick a category — tap to see its items:", hi: "श्रेणी चुनिए — टैप करते ही आइटम दिखेंगे:" },
     open:        { en: "Chat with us", hi: "बात कीजिए" },
     close:       { en: "Close chat", hi: "चैट बंद करें" },
     placeholder: { en: "Type your question…", hi: "अपना सवाल लिखिए…" },
@@ -160,7 +163,7 @@
     { id: "breakfast", en: ["breakfast", "nashta", "naashta"], hi: ["नाश्ता", "ब्रेकफास्ट"] },
     { id: "best",      en: ["best", "recommend", "recommendation", "suggest", "suggestion", "famous", "popular", "signature", "must try", "what to eat"], hi: ["बेस्ट", "मशहूर", "प्रसिद्ध", "सबसे अच्छा", "क्या खाएं", "क्या खाऊं", "सुझाव", "क्या खाना चाहिए", "कौन सी डिश"] },
     { id: "booking",   en: ["book", "reserve", "booking", "availability", "room available"], hi: ["बुक", "बुकिंग", "रिज़र्व", "खाली कमरा", "उपलब्ध"] },
-    { id: "order",     en: ["order", "takeaway", "take away", "parcel", "deliver", "home delivery", "pack", "packing"], hi: ["ऑर्डर", "पार्सल", "टेकअवे", "डिलीवरी", "मंगवा", "पैक", "पैकिंग"] },
+    { id: "order",     en: ["khana khana", "khana h", "khana hai", "order", "takeaway", "take away", "parcel", "deliver", "home delivery", "pack", "packing"], hi: ["ऑर्डर", "पार्सल", "टेकअवे", "डिलीवरी", "मंगवा", "पैक", "पैकिंग", "खाना खाना", "खाना है", "पैक करवाना", "पैक कराना"] },
     { id: "vacancy",   en: ["vacant", "vacancy", "free room", "room available", "rooms available", "any room available", "availability", "room mil jayega"], hi: ["खाली", "वैकेंसी", "कमरा मिल जयega", "कमरा मिलेगा", "रूम खाली", "जगह खाली"] },
     { id: "roomprice", en: ["rate", "rates", "price", "prices", "charge", "charges", "cost", "kitna", "kitne"], hi: ["दाम", "कीमत", "किराया", "कितना", "कितने", "चार्ज"] },
     { id: "rooms",     en: ["room", "rooms", "stay", "night", "accommodation"], hi: ["कमरा", "कमरे", "रुकना", "ठहरना", "रात"] },
@@ -247,6 +250,41 @@
       : `We have ${KB.hotel.roomsTotal} AC rooms in our pure-veg hotel:\n`) +
       KB.rooms.map(roomLine).join("\n") + "\n" + KB.priceBasis[lang] +
       (lang === "hi" ? "\nकिस कमरे की जानकारी चाहिए?" : "\nWhich room shall I tell you about?");
+  }
+  const TAB_ALIAS = {
+    "tab-thali": ["thali", "special"],
+    "tab-paneer": ["paneer", "panir", "pneer"],
+    "tab-masala": ["masala", "massala", "sabzi", "subzi", "curry"],
+    "tab-dahichawal": ["dahi", "rice", "chawal", "curd", "raita", "pulao", "lassi"],
+    "tab-roti": ["roti", "parantha", "paratha", "naan", "kulcha", "missi"],
+    "tab-fastfood": ["fast food", "fastfood", "fast-food", "snacks", "pakora", "pakoda", "maggi", "chai", "coffee", "burger", "pizza"],
+  };
+  function findTab(q) {
+    /* sirf tab-lookup jab query basically sirf category-naam ho —
+       "kadai paneer", "1 lassi" jaisi dish-orders ko hijack NA kare */
+    if (/\d/.test(q)) return null;
+    const STOP2 = new Set(["category", "categary", "me", "kya", "kya h", "hai", "h", "items", "item", "list", "ka", "ki", "ke", "and", "menu", "tell", "bata", "batao", "bat"]);
+    const ws = norm(q).split(/\s+/).filter((w) => w && !STOP2.has(w));
+    if (!ws.length) return null;
+    for (const k of Object.keys(MENU)) {
+      const cw = new Set();
+      (TAB_ALIAS[k] || []).forEach((a) => norm(a).split(/\s+/).forEach((w) => w && cw.add(w)));
+      norm((MENU[k].title.en || "") + " " + (MENU[k].title.hi || "")).split(/\s+/).forEach((w) => w && cw.add(w));
+      const cws = [...cw];
+      if (ws.every((w) => cws.some((c) => c === w || (c.length > 3 && (w.includes(c) || c.includes(w)))))) return k;
+    }
+    return null;
+  }
+  function tabAnswer(key) {
+    const tab = MENU[key];
+    const items = [].concat(tab.featured || [], tab.list || []);
+    const lines = items.map((d) => {
+      const hp = halfPriceOf(d);
+      return `• ${lang === "hi" ? d.name.hi : d.name.en} — ${rupees(d.price)}` +
+        (hp ? (lang === "hi" ? ` / हाफ ₹${hp}` : ` / half ₹${hp}`) : "");
+    });
+    return `${lang === "hi" ? tab.title.hi : tab.title.en} — ${items.length} ${lang === "hi" ? "आइटम" : "items"}:\n` + lines.join("\n") +
+      (lang === "hi" ? "\nऑर्डर करना हो तो बताइए!" : "\nWant to order? Just say so!");
   }
   function menuAnswer(dishes) {
     if (dishes && dishes.length) {
@@ -519,12 +557,21 @@
   const popularChips = () => allItems().filter((x) => x.it.hit).slice(0, 8)
     .map((x) => ({ label: `${lang === "hi" ? x.it.name.hi : x.it.name.en} ${rupees(x.it.price)}`, send: `ADD:${x.cat}:${x.idx}` }));
   const doneChip = () => ({ label: lang === "hi" ? "✅ बस, ऑर्डर भेजें" : "✅ Send order", send: "ORD:done" });
+  const catChips = () => Object.keys(MENU).map((k) => ({
+    label: lang === "hi" ? (MENU[k].title.hi || MENU[k].title.en) : MENU[k].title.en, send: "CAT:" + k,
+  }));
+  const itemChips = (key) => catItems(key).map((d, i) => ({
+    label: `${lang === "hi" ? d.name.hi : d.name.en} · ${rupees(d.price)}`, send: `ADD:${key}:${i}`,
+  })).concat([{ label: lang === "hi" ? "← श्रेणियाँ" : "← Categories", send: "CAT:list" }, doneChip()]);
+  const cartChips = () => (draft.cart || []).map((c, i) => ({
+    label: `✕ ${lang === "hi" ? c.hi : c.en}`, send: "REM:" + i,
+  })).concat([{ label: lang === "hi" ? "➕ और जोड़ें" : "➕ Add more", send: "CAT:list" }, doneChip()]);
   function askAdd(first) {
     bot(first
-      ? (lang === "hi" ? "बिल्कुल! 😊 क्या चाहिए? बस लिख दीजिए — जैसे \"2 थाली, 1 कड़ाही पनीर हाफ, 4 तवा रोटी\"। (पनीर व मसाला आइटम फुल/हाफ मिलते हैं।) या नीचे से चुनिए:"
-        : "Of course! 😊 What would you like? Just write it — e.g. \"2 thali, 1 kadhai paneer half, 4 tawa roti\". (Paneer & masala items come in full/half.) Or tap below:")
-      : (lang === "hi" ? "और क्या चाहिए? लिखिए या नीचे चुनिए — हो जाए तो \"बस\" लिखिए:" : "What else? Write or tap below — write \"done\" when finished:"));
-    setChips(popularChips().concat([doneChip()]));
+      ? (lang === "hi" ? "पैक/पार्सल बिल्कुल हो जाएगा! 😊 (होम डिलीवरी नहीं।) पहले नीचे श्रेणी चुनिए — टैप करते ही आइटम बटन के रूप में आ जाएँगे। चाहें तो लिख दीजिए — जैसे \"2 थाली, 1 कड़ाही पनीर हाफ\"। पनीर व मसाला फुल/हाफ मिलते हैं।"
+        : "Yes, we'll pack it for you! 😊 (No home delivery.) First pick a category below — tapping it shows its items as buttons. Just write if you prefer — e.g. \"2 thali, 1 kadhai paneer half\". Paneer & masala come in full/half.")
+      : (lang === "hi" ? "और क्या चाहिए? श्रेणी चुनिए या लिखिए — हो जाए तो \"बस\" लिखिए:" : "What else? Pick a category or type — write \"done\" when finished:"));
+    setChips(catChips().concat([doneChip()]));
   }
   function addToCart(list) {
     const found = { explicitQty: list.some((f) => f.explicit) };
@@ -535,8 +582,9 @@
       if (ex) { if (found.explicitQty) ex.qty = qty; else ex.qty += qty; }
       else draft.cart.push({ en: it.name.en, hi: it.name.hi, price, qty, half: !!half });
     });
-    bot((lang === "hi" ? "जोड़ दिया ✅\n" : "Added ✅\n") + cartLines(lang) + `\n💰 ${t("ordTotal")}: ₹${cartTotal().toLocaleString("en-IN")}`);
-    setChips(popularChips().concat([doneChip()]));
+    bot((lang === "hi" ? "जोड़ दिया ✅\n" : "Added ✅\n") + cartLines(lang) + `\n💰 ${t("ordTotal")}: ₹${cartTotal().toLocaleString("en-IN")}` +
+      (lang === "hi" ? "\n(किसी आइटम को हटाने के लिए उसका ✕ बटन दबाइए)" : "\n(Tap an item's ✕ button to remove it)"));
+    setChips(cartChips());
   }
   function contactStep() {
     flow.step = "contact";
@@ -637,12 +685,26 @@
           if (!r && q) r = null;
           if (!r) { bot(t("bkRoom")); return; }
           draft.roomName = (lang === "hi" ? r.nameHi : r.name) + " (₹" + r.price.toLocaleString("en-IN") + ")";
-          flow.step = "dates"; bot(t("bkDates")); return;
+          flow.step = "when"; bot(t("bkWhen")); return;
         }
-        if (flow.step === "dates") { draft.dates = raw; flow.step = "guests"; bot(t("bkGuests")); return; }
-        if (flow.step === "guests") { draft.guests = raw; flow.step = "name"; bot(t("bkName")); return; }
-        if (flow.step === "name") { draft.name = raw; flow.step = "phone"; bot(t("bkPhone")); return; }
-        if (flow.step === "phone") {
+        if (flow.step === "when") {
+          const gm = raw.match(/(\d{1,2})\s*(?:log|guests?|people|persons?|members?|व्यक्ति|जन|लोग|बंदे)/i) || raw.match(/[,\s]([1-9])\s*$/);
+          draft.guests = gm ? gm[1] : "2";
+          draft.dates = (gm ? raw.replace(gm[0], "") : raw).replace(/\s*[,,]\s*/g, " ").replace(/\s{2,}/g, " ").trim() || raw;
+          flow.step = "contact"; bot(t("bkContact")); return;
+        }
+        if (flow.step === "contact") {
+          const digits = raw.replace(/\D/g, "");
+          const ph = digits.slice(-10);
+          const okP = digits.length >= 10 && /^[6-9]\d{9}$/.test(ph);
+          let nm = raw.replace(/\+?\d[\d\s\-()]{7,}/g, " ").replace(/\s{2,}/g, " ").trim().replace(/^[,\-\s]+|[,\-\s]+$/g, "");
+          if (okP && nm.length >= 2) { draft.phone = ph; draft.name = nm; finishBooking(); return; }
+          if (okP) { draft.phone = ph; flow.step = "nameOnly"; bot(lang === "hi" ? "नाम भी लिख दीजिए:" : "Your name too, please:"); return; }
+          if (nm.length >= 2) { draft.name = nm; flow.step = "phoneOnly"; bot(lang === "hi" ? "कृपया सही 10 अंकों का मोबाइल नंबर लिखिए।" : "Please write a valid 10-digit mobile number."); return; }
+          bot(t("bkContact")); return;
+        }
+        if (flow.step === "nameOnly") { draft.name = raw.trim(); finishBooking(); return; }
+        if (flow.step === "phoneOnly") {
           if (!isPhone(raw)) { bot(lang === "hi" ? "कृपया सही 10 अंकों का मोबाइल नंबर लिखिए।" : "Please write a valid 10-digit mobile number."); return; }
           draft.phone = raw.replace(/\D/g, "").slice(-10); finishBooking(); return;
         }
@@ -652,6 +714,32 @@
           if (raw === "ORD:done" || /done|ho gaya|हो गया|complete|cart|कार्ट|send order|भेज/.test(raw) || /^bas$|^बस$/.test(raw)) {
             if (!(draft.cart || []).length) { bot(t("ordEmpty")); askAdd(true); return; }
             contactStep(); return;
+          }
+          if (raw === "CAT:list") { bot(t("ordCat")); setChips(catChips().concat([doneChip()])); return; }
+          if (raw.startsWith("CAT:")) {
+            const k = raw.slice(4);
+            if (MENU[k]) {
+              bot((lang === "hi" ? MENU[k].title.hi : MENU[k].title.en) +
+                (lang === "hi" ? " — आइटम बटन पर टैप करके कार्ट में डालिए:" : " — tap an item button to add it to your cart:"));
+              setChips(itemChips(k)); return;
+            }
+          }
+          if (raw.startsWith("REM:")) {
+            const i = Number(raw.slice(4));
+            if ((draft.cart || [])[i]) {
+              const c = draft.cart.splice(i, 1)[0];
+              bot((lang === "hi" ? "हटा दिया ✕ " : "Removed ✕ ") + (lang === "hi" ? c.hi : c.en) +
+                ((draft.cart || []).length
+                  ? "\n" + cartLines(lang) + `\n💰 ${t("ordTotal")}: ₹${cartTotal().toLocaleString("en-IN")}`
+                  : (lang === "hi" ? "\nकार्ट खाली है — श्रेणी चुनिए:" : "\nCart is empty — pick a category:")));
+              setChips((draft.cart || []).length ? cartChips() : catChips().concat([doneChip()]));
+            }
+            return;
+          }
+          const tkAdd = raw.includes(":") ? null : findTab(q);
+          if (tkAdd) {
+            bot(tabAnswer(tkAdd) + (lang === "hi" ? "\nनीचे बटन से जोड़िए, या नाम लिखिए:" : "\nAdd via the buttons below, or type a name:"));
+            setChips(itemChips(tkAdd)); return;
           }
           if (raw.startsWith("ADD:") || raw.startsWith("ITEM:")) {
             const p = raw.split(":");
@@ -663,8 +751,8 @@
           if (found.length) { addToCart(found); return; }
           const oe = detect(raw);
           if (oe && oe !== "order" && oe !== "menu") { flow = null; return handle(raw, display, true); }
-          bot(lang === "hi" ? "समझा नहीं 🙏 — व्यंजन का नाम लिखिए (जैसे \"2 थाली\") या नीचे दबाइए:" : "Didn't catch 🙏 — write the dish name (e.g. \"2 thali\") or tap below:");
-          setChips(popularChips().concat([doneChip()]));
+          bot(lang === "hi" ? "समझा नहीं 🙏 — श्रेणी चुनिए या व्यंजन का नाम लिखिए (जैसे \"2 थाली\"):" : "Didn't catch 🙏 — pick a category or write the dish name (e.g. \"2 thali\"):");
+          setChips(catChips().concat([doneChip()]));
           return;
         }
         if (flow.step === "contact") {
@@ -737,9 +825,18 @@
       }
       case "vacancy": vacancyAnswer(); return;
       case "roomprice": case "rooms": bot(roomsAnswer(room)); return;
-      case "menu":
+      case "menu": {
         if (/jain|जैन/.test(q)) { bot((lang === "hi" ? KB.policies.pureVegHi : KB.policies.pureVeg) + "\n" + KB.policies.jain[lang]); return; }
+        const nq0 = norm(q);
+        const exact = dishes.find((d) => {
+          const e = norm(d.name.en), hh = norm(d.name.hi);
+          return (e.length > 2 && nq0.includes(e)) || (hh.length > 1 && nq0.includes(hh));
+        });
+        if (exact) { bot(menuAnswer(dishes)); return; }
+        const tk0 = findTab(q);
+        if (tk0) { bot(tabAnswer(tk0)); return; }
         bot(menuAnswer(dishes.length ? dishes : null)); return;
+      }
       case "veg": bot((lang === "hi" ? KB.policies.pureVegHi || KB.policies.pureVeg : KB.policies.pureVeg) + "\n" + KB.policies.jain[lang]); return;
       case "hours":
         bot(lang === "hi"
@@ -762,10 +859,11 @@
       }
       case "review":
         bot((lang === "hi" ? `हमें ${KB.hotel.rating.score}★ रेटिंग मिली है (${KB.hotel.rating.count}+ रिव्यू, ${KB.hotel.rating.source})। आपका अनुभव कैसा रहा? गूगल पर रिव्यू लिखिए:` : `We are rated ${KB.hotel.rating.score}★ (${KB.hotel.rating.count}+ reviews, ${KB.hotel.rating.source}). How was your experience? Review us on Google:`),
-          [{ label: lang === "hi" ? "गूगल पर रिव्यू लिखें" : "Write a Google review", href: "https://search.google.com/local/writereview?placeid=0x3915cb5560ab22f7:0xd98ef3784c89800d", wa: true }]); return;
+          [{ label: lang === "hi" ? "गूगल पर रिव्यू लिखें" : "Write a Google review", href: "https://g.page/r/CQ2AiUx4847ZEBE/review", wa: true }]); return;
       case "contact":
         bot((lang === "hi" ? "हमसे संपर्क कीजिए:" : "Reach us:") + `\n📞 ${KB.contact.phonePrimary}\n📞 ${KB.contact.phoneSecondary}\n📧 ${KB.contact.email}`, actions(raw)); return;
       default:
+        { const tkD = findTab(q); if (tkD) { bot(tabAnswer(tkD)); return; } }
         if (dishes.length) { bot(menuAnswer(dishes)); return; }
         if (room) { bot(roomsAnswer(room)); return; }
         const faq = (KB.faq || []).find((f) => q.includes(norm(f.q)) || q.includes(norm(f.qHi)) || norm(f.q).split(" ").some((w) => w.length > 4 && q.includes(w)));
@@ -795,5 +893,5 @@
     if (opened && !msgs.children.length) addMsg("bot", t("greeting"));
   });
 
-  window.SMM_AGENT = { open: openPanel, handle, version: "18" };
+  window.SMM_AGENT = { open: openPanel, handle, version: "20" };
 })();
