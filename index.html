@@ -31,15 +31,12 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%235E1628'/%3E%3Cpath d='M32 10l14 22-14 22-14-22z' fill='none' stroke='%23B98A3E' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='4' fill='%23B98A3E'/%3E%3C/svg%3E">
 
   <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
   <!-- Styles -->
-  <link rel="stylesheet" href="assets/css/style.css?v=10">
+  <link rel="stylesheet" href="assets/css/style.css?v=11">
 
   <!-- Hero performance -->
-  <link rel="preload" as="image" href="images/hero/hero-1.webp" fetchpriority="high">
+  <link rel="preload" as="image" imagesrcset="images/hero/hero-1-640.webp 640w, images/hero/hero-1.webp 1080w" imagesizes="(max-width: 920px) 100vw, 46vw" fetchpriority="high">
 
   <!-- Structured data: Hotel + Restaurant -->
   <script type="application/ld+json">
@@ -198,14 +195,15 @@
         <div class="hero-slides">
           <div class="hero-slide active">
             <img src="images/hero/hero-1.webp" alt="Shri Maha Maya Hotel & Restaurant — hotel front view at Pallu"
+                 srcset="images/hero/hero-1-640.webp 640w, images/hero/hero-1.webp 1080w" sizes="(max-width: 920px) 100vw, 46vw" fetchpriority="high"
                  fetchpriority="high" decoding="async"
                  onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22900%22 height=%221200%22><rect width=%22900%22 height=%221200%22 fill=%22%233D0E1B%22/></svg>'">
           </div>
           <div class="hero-slide">
-            <img src="images/hero/hero-2.webp" alt="Dining hall at Shri Maha Maya" loading="lazy" decoding="async">
+            <img src="images/hero/hero-2.webp" alt="Dining hall at Shri Maha Maya" loading="lazy" srcset="images/hero/hero-2-640.webp 640w, images/hero/hero-2.webp 1080w" sizes="(max-width: 920px) 100vw, 46vw" decoding="async" width="1080" height="1440">
           </div>
           <div class="hero-slide">
-            <img src="images/hero/hero-3.webp" alt="Reception area at Shri Maha Maya" loading="lazy" decoding="async">
+            <img src="images/hero/hero-3.webp" alt="Reception area at Shri Maha Maya" loading="lazy" srcset="images/hero/hero-3-640.webp 640w, images/hero/hero-3.webp 1080w" sizes="(max-width: 920px) 100vw, 46vw" decoding="async" width="935" height="1683">
           </div>
         </div>
         <div class="hero-veil"></div>
@@ -246,10 +244,10 @@
     <div class="about-media reveal" style="--d:.2s">
       <div class="frame"></div>
       <figure class="main-img">
-        <img src="images/hero/hero-1.webp" alt="Shri Maha Maya Hotel — the front of the hotel at Pallu" loading="lazy" decoding="async">
+        <img src="images/hero/hero-1.webp" alt="Shri Maha Maya Hotel — the front of the hotel at Pallu" loading="lazy" decoding="async" width="1080" height="1460">
       </figure>
       <figure class="side-img">
-        <img src="images/hero/hero-2.webp" alt="The dining hall where every thali is served" loading="lazy" decoding="async">
+        <img src="images/hero/hero-2.webp" alt="The dining hall where every thali is served" loading="lazy" decoding="async" width="1080" height="1440">
       </figure>
       <div class="seal"><span><em>अतिथि</em> देवो भव<br><em>The guest is God</em></span></div>
     </div>
@@ -259,7 +257,7 @@
 <!-- ============ PARALLAX BAND ============ -->
 <section class="parallax-band" aria-label="Hospitality promise">
   <div class="bg" data-parallax="1">
-    <img src="images/hero/hero-2.webp" alt="" aria-hidden="true" loading="lazy" decoding="async">
+    <img src="images/hero/hero-2.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" width="1080" height="1440">
   </div>
   <div class="veil"></div>
   <div class="inner">
@@ -285,7 +283,7 @@
         data-imgs='[{"src":"images/rooms/room-standard.webp","cap":"Standard AC Room · स्टैण्डर्ड एसी कमरा"},{"src":"images/rooms/room-standard-2.webp","cap":"Standard AC Room · स्टैण्डर्ड एसी कमरा"}]'
         data-price="₹1,000" data-i18n-name="r.standard.n" data-i18n-desc="r.standard.d">
         <div class="room-media">
-          <img src="images/rooms/room-standard.webp" alt="Standard AC room at Shri Maha Maya — queen bed, air conditioned" loading="lazy" decoding="async">
+          <img src="images/rooms/room-standard.webp" alt="Standard AC room at Shri Maha Maya — queen bed, air conditioned" loading="lazy" decoding="async" width="1000" height="1333">
           <span class="room-price">₹1,000</span>
           <span class="room-view"><span data-icon="zoom"></span> View</span>
         </div>
@@ -314,7 +312,7 @@
         data-imgs='[{"src":"images/rooms/room-deluxe-3.webp","cap":"Deluxe AC Room · डीलक्स एसी कमरा"},{"src":"images/rooms/room-deluxe.webp","cap":"Deluxe AC Room · डीलक्स एसी कमरा"},{"src":"images/rooms/room-deluxe-2.webp","cap":"Deluxe AC Room · डीलक्स एसी कमरा"}]'
         data-price="₹1,200" data-i18n-name="r.deluxe.n" data-i18n-desc="r.deluxe.d">
         <div class="room-media">
-          <img src="images/rooms/room-deluxe-3.webp" alt="Deluxe AC room at Shri Maha Maya — king bed" loading="lazy" decoding="async">
+          <img src="images/rooms/room-deluxe-3.webp" alt="Deluxe AC room at Shri Maha Maya — king bed" loading="lazy" decoding="async" width="1000" height="852">
           <span class="room-price">₹1,200</span>
           <span class="room-view"><span data-icon="zoom"></span> View</span>
         </div>
@@ -344,7 +342,7 @@
         data-imgs='[{"src":"images/rooms/room-family-3.webp","cap":"Family AC Room · फ़ैमिली एसी कमरा"},{"src":"images/rooms/room-family.webp","cap":"Family AC Room · फ़ैमिली एसी कमरा"},{"src":"images/rooms/room-family-2.webp","cap":"Family AC Room · फ़ैमिली एसी कमरा"}]'
         data-price="₹1,400" data-i18n-name="r.family.n" data-i18n-desc="r.family.d">
         <div class="room-media">
-          <img src="images/rooms/room-family-3.webp" alt="Family AC room at Shri Maha Maya — two queen beds" loading="lazy" decoding="async">
+          <img src="images/rooms/room-family-3.webp" alt="Family AC room at Shri Maha Maya — two queen beds" loading="lazy" decoding="async" width="1000" height="2222">
           <span class="room-price">₹1,400</span>
           <span class="room-view"><span data-icon="zoom"></span> View</span>
         </div>
@@ -410,51 +408,51 @@
 
         <div class="masonry reveal">
       <figure class="g-item" data-gallery="main" data-full="images/hero/hero-1.webp" data-cap="The Hotel · होटल">
-        <img src="images/hero/hero-1.webp" alt="Hotel front view at Pallu" loading="lazy" decoding="async" style="--ar:3/3.9">
+        <img src="images/hero/hero-1.webp" alt="Hotel front view at Pallu" loading="lazy" decoding="async" style="--ar:3/3.9" width="1080" height="1460">
         <span class="cap">The Hotel</span>
       </figure>
       <figure class="g-item" data-gallery="main" data-full="images/hero/hero-2.webp" data-cap="Dining Hall · भोजन कक्ष">
-        <img src="images/hero/hero-2.webp" alt="Dining hall" loading="lazy" decoding="async" style="--ar:3/4">
+        <img src="images/hero/hero-2.webp" alt="Dining hall" loading="lazy" decoding="async" style="--ar:3/4" width="1080" height="1440">
         <span class="cap">Dining Hall</span>
       </figure>
       <figure class="g-item" data-gallery="main" data-full="images/rooms/room-standard.webp" data-cap="Guest Room · अतिथि कक्ष">
-        <img src="images/rooms/room-standard.webp" alt="Guest room at Shri Maha Maya" loading="lazy" decoding="async" style="--ar:4/3.2">
+        <img src="images/rooms/room-standard.webp" alt="Guest room at Shri Maha Maya" loading="lazy" decoding="async" style="--ar:4/3.2" width="1000" height="1333">
         <span class="cap">Guest Room</span>
       </figure>
       <figure class="g-item" data-gallery="main" data-full="images/food/food-thali.webp" data-cap="Rajasthani Thali · राजस्थानी थाली">
-        <img src="images/food/food-thali.webp" alt="Rajasthani thali" loading="lazy" decoding="async" style="--ar:4/3">
+        <img src="images/food/food-thali.webp" alt="Rajasthani thali" loading="lazy" decoding="async" style="--ar:4/3" width="800" height="437">
         <span class="cap">The Thali</span>
       </figure>
       <figure class="g-item" data-gallery="main" data-full="images/hero/hero-3.webp" data-cap="Reception · स्वागत कक्ष">
-        <img src="images/hero/hero-3.webp" alt="Hotel reception" loading="lazy" decoding="async" style="--ar:3/4.4">
+        <img src="images/hero/hero-3.webp" alt="Hotel reception" loading="lazy" decoding="async" style="--ar:3/4.4" width="935" height="1683">
         <span class="cap">Reception</span>
       </figure>
       <figure class="g-item" data-gallery="main" data-full="images/rooms/room-deluxe.webp" data-cap="Guest Room · अतिथि कक्ष">
-        <img src="images/rooms/room-deluxe.webp" alt="Guest room at Shri Maha Maya" loading="lazy" decoding="async" style="--ar:3/3.9">
+        <img src="images/rooms/room-deluxe.webp" alt="Guest room at Shri Maha Maya" loading="lazy" decoding="async" style="--ar:3/3.9" width="1000" height="1374">
         <span class="cap">Guest Room</span>
       </figure>
       <figure class="g-item" data-gallery="main" data-full="images/rooms/room-standard-2.webp" data-cap="Guest Room · अतिथि कक्ष">
-        <img src="images/rooms/room-standard-2.webp" alt="Guest room at Shri Maha Maya" loading="lazy" decoding="async" style="--ar:4/3">
+        <img src="images/rooms/room-standard-2.webp" alt="Guest room at Shri Maha Maya" loading="lazy" decoding="async" style="--ar:4/3" width="866" height="649">
         <span class="cap">Guest Room</span>
       </figure>
       <figure class="g-item" data-gallery="main" data-full="images/rooms/room-deluxe-2.webp" data-cap="Guest Room · अतिथि कक्ष">
-        <img src="images/rooms/room-deluxe-2.webp" alt="Guest room at Shri Maha Maya" loading="lazy" decoding="async" style="--ar:3/4">
+        <img src="images/rooms/room-deluxe-2.webp" alt="Guest room at Shri Maha Maya" loading="lazy" decoding="async" style="--ar:3/4" width="649" height="866">
         <span class="cap">Guest Room</span>
       </figure>
       <figure class="g-item" data-gallery="main" data-full="images/rooms/room-family-2.webp" data-cap="Guest Room · अतिथि कक्ष">
-        <img src="images/rooms/room-family-2.webp" alt="Guest room at Shri Maha Maya" loading="lazy" decoding="async" style="--ar:4/3">
+        <img src="images/rooms/room-family-2.webp" alt="Guest room at Shri Maha Maya" loading="lazy" decoding="async" style="--ar:4/3" width="866" height="649">
         <span class="cap">Guest Room</span>
       </figure>
       <figure class="g-item" data-gallery="main" data-full="images/rooms/room-deluxe-3.webp" data-cap="Deluxe Room · डीलक्स कक्ष">
-        <img src="images/rooms/room-deluxe-3.webp" alt="Deluxe room at Shri Maha Maya" loading="lazy" decoding="async" style="--ar:4/3.4">
+        <img src="images/rooms/room-deluxe-3.webp" alt="Deluxe room at Shri Maha Maya" loading="lazy" decoding="async" style="--ar:4/3.4" width="1000" height="852">
         <span class="cap">Deluxe Room</span>
       </figure>
       <figure class="g-item" data-gallery="main" data-full="images/rooms/room-family-3.webp" data-cap="Family Room · फ़ैमिली कक्ष">
-        <img src="images/rooms/room-family-3.webp" alt="Family room at Shri Maha Maya" loading="lazy" decoding="async" style="--ar:3/4.6">
+        <img src="images/rooms/room-family-3.webp" alt="Family room at Shri Maha Maya" loading="lazy" decoding="async" style="--ar:3/4.6" width="1000" height="2222">
         <span class="cap">Family Room</span>
       </figure>
       <figure class="g-item" data-gallery="main" data-full="images/rooms/room-family.webp" data-cap="Family Room · फ़ैमिली कक्ष">
-        <img src="images/rooms/room-family.webp" alt="Family room at Shri Maha Maya" loading="lazy" decoding="async" style="--ar:4/3">
+        <img src="images/rooms/room-family.webp" alt="Family room at Shri Maha Maya" loading="lazy" decoding="async" style="--ar:4/3" width="1000" height="770">
         <span class="cap">Family Room</span>
       </figure>
     </div>
@@ -794,7 +792,7 @@
   <span class="lb-counter" id="lb-counter"></span>
   <button class="lb-close" id="lb-close" data-icon="close" aria-label="Close"></button>
   <div class="lb-stage">
-    <img id="lb-stage-img" src="" alt="Photo viewer">
+    <img id="lb-stage-img" alt="Photo viewer" width="1200" height="800">
     <span class="lb-cap" id="lb-cap"></span>
     <button class="lb-btn lb-prev" id="lb-prev" data-icon="chevL" aria-label="Previous image"></button>
     <button class="lb-btn lb-next" id="lb-next" data-icon="chevR" aria-label="Next image"></button>
@@ -806,8 +804,8 @@
 <script src="assets/js/menu.js?v=6" defer></script>
 <script>window.AGENT_CONFIG={api:"https://shreemahamayahotel.onrender.com",availabilityUrl:"https://script.google.com/macros/s/AKfycbxMPgJz2A-lnudhgkhctjL4FlbXmiivlpl7afj0Bceyf3ikXpvORlNHNE_L80ByqvcxUA/exec"}</script>
 <script src="assets/js/knowledge.js?v=3" defer></script>
-<script src="assets/js/agent.js?v=18" defer></script>
-<script src="assets/js/app.js?v=14" defer></script>
+<script src="assets/js/agent.js?v=20" defer></script>
+<script src="assets/js/app.js?v=15" defer></script>
 <noscript>
   <style>
     .reveal, .hero-eyebrow, .hero-baseline, .hero-sub, .hero-desc, .hero-ctas, .veg-seal, .hero h1 { opacity: 1 !important; transform: none !important; }
