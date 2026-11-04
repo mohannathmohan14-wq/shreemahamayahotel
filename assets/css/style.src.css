@@ -675,7 +675,7 @@ section { scroll-margin-top: calc(var(--nav-h) + 8px); }
   display: flex; align-items: flex-end; text-align: center;
   cursor: pointer;
   background:
-    url('../images/map/map-bg.webp') center/cover no-repeat,
+    url('../../images/map/map-bg.webp') center/cover no-repeat,
     linear-gradient(160deg, #FBF7EE 0%, #F3ECDD 100%);
 }
 .map-static::before {
