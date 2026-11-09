@@ -99,7 +99,7 @@ body {
   overflow-x: hidden;
 }
 
-img { display: block; max-width: 100%; }
+img { display: block; max-width: 100%; height: auto; }
 a { color: inherit; text-decoration: none; }
 ul { list-style: none; }
 button { font-family: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
@@ -249,7 +249,7 @@ section { scroll-margin-top: calc(var(--nav-h) + 8px); }
 .m-menu-links a:hover { color: var(--gold); }
 .m-menu-links a .n { font-family: var(--font-body); font-size: 0.7rem; letter-spacing: 0.3em; color: var(--gold); opacity: 0.9; }
 .m-menu-foot { margin-top: auto; text-align: center; }
-.m-menu-foot a { color: var(--gold); }
+.m-menu-foot a { display: inline-block; padding: 8px 0; color: var(--gold); }
 
 /* ---------- Hero ---------- */
 .hero {
@@ -361,9 +361,10 @@ section { scroll-margin-top: calc(var(--nav-h) + 8px); }
   display: grid; place-items: center; font-size: 1.05rem; transition: all 0.3s;
 }
 .hero-controls > button:hover { background: var(--gold); border-color: var(--gold); color: var(--maroon-950); }
-.hero-dots { display: flex; gap: 9px; }
-.hero-dots button { width: 22px; height: 3px; border-radius: 2px; background: rgba(250, 246, 236, 0.3); transition: all 0.4s; }
-.hero-dots button.active { background: var(--gold); width: 38px; }
+/* touch-target fix: 26x25 hit area, visual bar 22x3 (padding + background-clip) */
+.hero-dots { display: flex; gap: 3px; }
+.hero-dots button { box-sizing: border-box; width: 26px; height: 25px; padding: 11px 2px; background-clip: content-box; border-radius: 2px; background-color: rgba(250, 246, 236, 0.3); transition: background-color 0.4s; }
+.hero-dots button.active { background-color: var(--gold); width: 42px; }
 
 .scroll-cue {
   position: absolute; z-index: 4; left: 50%; transform: translateX(-50%); bottom: 22px;
@@ -452,7 +453,7 @@ section { scroll-margin-top: calc(var(--nav-h) + 8px); }
 .parallax-band .bg img { width: 100%; height: 100%; object-fit: cover; }
 .parallax-band .veil { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(30,8,15,.78), rgba(30,8,15,.45)); z-index: 1; }
 .parallax-band .inner { position: relative; z-index: 2; padding: 90px 6%; }
-.parallax-band h3 { font-family: var(--font-display); font-style: italic; font-size: clamp(1.6rem, 3.4vw, 2.6rem); font-weight: 500; color: var(--ivory); max-width: 780px; margin: 0 auto 20px; }
+.parallax-band h2, .parallax-band h3 { font-family: var(--font-display); font-style: italic; font-size: clamp(1.6rem, 3.4vw, 2.6rem); font-weight: 500; color: var(--ivory); max-width: 780px; margin: 0 auto 20px; }
 .parallax-band p { color: rgba(250, 246, 236, 0.8); font-size: 0.9rem; max-width: 520px; margin: 0 auto 30px; }
 
 /* ---------- Rooms ---------- */
@@ -474,15 +475,17 @@ section { scroll-margin-top: calc(var(--nav-h) + 8px); }
 }
 .room-slide { min-width: 100%; height: 100%; }
 .room-slide img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+/* touch-target fix: 24x24 hit area, visual dot 8px (padding + background-clip: content-box) */
 .room-dots {
-  position: absolute; z-index: 3; left: 50%; transform: translateX(-50%); bottom: 12px;
-  display: flex; gap: 7px;
+  position: absolute; z-index: 3; left: 50%; transform: translateX(-50%); bottom: 4px;
+  display: flex; gap: 0;
 }
 .room-dots button {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: rgba(250, 246, 236, 0.45); transition: all 0.3s;
+  box-sizing: border-box; width: 24px; height: 24px; padding: 8px; background-clip: content-box;
+  border-radius: 50%; background-color: rgba(250, 246, 236, 0.45);
+  transition: background-color 0.3s, transform 0.3s;
 }
-.room-dots button.active { background: var(--gold); transform: scale(1.35); }
+.room-dots button.active { background-color: var(--gold); transform: scale(1.35); }
 .room-count {
   position: absolute; z-index: 3; top: 12px; right: 12px;
   padding: 4px 11px; border-radius: 999px;
@@ -566,7 +569,7 @@ section { scroll-margin-top: calc(var(--nav-h) + 8px); }
 .dish-badge { position: absolute; top: 14px; left: 14px; background: var(--maroon-800); color: var(--gold); font-size: 0.62rem; letter-spacing: 0.24em; text-transform: uppercase; padding: 6px 14px; border-radius: 999px; }
 .dish-body { padding: 20px 22px 22px; }
 .dish-body .row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
-.dish-body h4 { font-size: 1.25rem; font-weight: 600; }
+.dish-body h3 { font-size: 1.25rem; font-weight: 600; }
 .dish-body .hi { font-size: 0.72rem; color: var(--ink-3); margin-top: 2px; }
 .dish-body .price { font-family: var(--font-display); font-size: 1.3rem; font-weight: 600; color: var(--maroon-700); white-space: nowrap; }
 .dish-body p { font-size: 0.8rem; color: var(--ink-2); margin-top: 8px; }
@@ -648,9 +651,10 @@ section { scroll-margin-top: calc(var(--nav-h) + 8px); }
 .t-card .who b { display: block; font-weight: 500; font-size: 0.88rem; }
 .t-card .who span { font-size: 0.72rem; color: var(--ink-3); }
 .t-card .g-mark { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 0.68rem; color: var(--ink-3); }
-.testi-dots { display: flex; justify-content: center; gap: 9px; margin-top: 6px; }
-.testi-dots button { width: 22px; height: 22px; padding: 7px; background-clip: content-box; border-radius: 50%; background-color: rgba(94, 22, 40, 0.22); transition: all 0.35s; }
-.testi-dots button.active { background: var(--maroon-700); transform: scale(1.25); }
+/* touch-target fix: 26x26 hit area, visual dot 8px */
+.testi-dots { display: flex; justify-content: center; gap: 0; margin-top: 6px; }
+.testi-dots button { box-sizing: border-box; width: 26px; height: 26px; padding: 8px; background-clip: content-box; border-radius: 50%; background-color: rgba(94, 22, 40, 0.22); transition: background-color 0.35s, transform 0.35s; }
+.testi-dots button.active { background-color: var(--maroon-700); transform: scale(1.25); }
 
 /* ---------- Location ---------- */
 .location { padding: clamp(80px, 11vw, 140px) 0; background: var(--paper); }
@@ -757,7 +761,7 @@ section { scroll-margin-top: calc(var(--nav-h) + 8px); }
 .footer h4 { color: var(--ivory); font-size: 1.05rem; font-weight: 600; letter-spacing: 0.06em; margin-bottom: 18px; }
 .footer h4::after { content: ""; display: block; width: 30px; height: 1.5px; background: var(--gold); margin-top: 9px; }
 .footer-links li { margin-bottom: 9px; }
-.footer-links a { font-size: 0.84rem; color: rgba(250, 246, 236, 0.65); transition: color 0.3s, padding 0.3s; }
+.footer-links a { display: inline-block; padding: 4px 0; font-size: 0.84rem; color: rgba(250, 246, 236, 0.65); transition: color 0.3s, padding 0.3s; }
 .footer-links a:hover { color: var(--gold); padding-left: 5px; }
 .footer-contact li { display: flex; gap: 11px; font-size: 0.84rem; margin-bottom: 13px; color: rgba(250, 246, 236, 0.65); align-items: flex-start; }
 .footer-contact svg { width: 16px; height: 16px; color: var(--gold); flex: none; margin-top: 4px; }
