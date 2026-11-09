@@ -33,10 +33,10 @@
   <!-- Fonts -->
 
   <!-- Styles -->
-  <link rel="stylesheet" href="assets/css/style.css?v=12">
+  <link rel="stylesheet" href="assets/css/style.css?v=14">
 
   <!-- Hero performance -->
-  <link rel="preload" as="image" imagesrcset="images/hero/hero-1-640.webp 640w, images/hero/hero-1.webp 1080w" imagesizes="(max-width: 920px) 100vw, 46vw" fetchpriority="high">
+  <link rel="preload" as="image" imagesrcset="images/hero/hero-1-640.webp 640w, images/hero/hero-1-800.webp 800w, images/hero/hero-1.webp 1080w" imagesizes="(max-width: 920px) 100vw, 46vw" fetchpriority="high">
 
   <!-- Structured data: Hotel + Restaurant -->
   <script type="application/ld+json">
@@ -195,15 +195,14 @@
         <div class="hero-slides">
           <div class="hero-slide active">
             <img src="images/hero/hero-1.webp" alt="Shri Maha Maya Hotel & Restaurant — hotel front view at Pallu"
-                 srcset="images/hero/hero-1-640.webp 640w, images/hero/hero-1.webp 1080w" sizes="(max-width: 920px) 100vw, 46vw" fetchpriority="high"
-                 fetchpriority="high" decoding="async"
+                 srcset="images/hero/hero-1-640.webp 640w, images/hero/hero-1-800.webp 800w, images/hero/hero-1.webp 1080w" sizes="(max-width: 920px) 100vw, 46vw" fetchpriority="high" decoding="async"
                  onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22900%22 height=%221200%22><rect width=%22900%22 height=%221200%22 fill=%22%233D0E1B%22/></svg>'">
           </div>
           <div class="hero-slide">
-            <img src="images/hero/hero-2.webp" alt="Dining hall at Shri Maha Maya" loading="lazy" srcset="images/hero/hero-2-640.webp 640w, images/hero/hero-2.webp 1080w" sizes="(max-width: 920px) 100vw, 46vw" decoding="async" width="1080" height="1440">
+            <img src="data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%221080%22 height=%221440%22><rect width=%221080%22 height=%221440%22 fill=%22%233D0E1B%22/></svg>" data-src="images/hero/hero-2.webp" data-srcset="images/hero/hero-2-640.webp 640w, images/hero/hero-2-800.webp 800w, images/hero/hero-2.webp 1080w" alt="Dining hall at Shri Maha Maya" loading="lazy" fetchpriority="low" sizes="(max-width: 920px) 100vw, 46vw" decoding="async" width="1080" height="1440">
           </div>
           <div class="hero-slide">
-            <img src="images/hero/hero-3.webp" alt="Reception area at Shri Maha Maya" loading="lazy" srcset="images/hero/hero-3-640.webp 640w, images/hero/hero-3.webp 1080w" sizes="(max-width: 920px) 100vw, 46vw" decoding="async" width="935" height="1683">
+            <img src="data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22935%22 height=%221683%22><rect width=%22935%22 height=%221683%22 fill=%22%233D0E1B%22/></svg>" data-src="images/hero/hero-3.webp" data-srcset="images/hero/hero-3-640.webp 640w, images/hero/hero-3-800.webp 800w, images/hero/hero-3.webp 935w" alt="Reception area at Shri Maha Maya" loading="lazy" fetchpriority="low" sizes="(max-width: 920px) 100vw, 46vw" decoding="async" width="935" height="1683">
           </div>
         </div>
         <div class="hero-veil"></div>
@@ -211,7 +210,7 @@
       </div>
       <div class="hero-controls">
         <button id="hero-prev" data-icon="chevL" aria-label="Previous slide"></button>
-        <div class="hero-dots" id="hero-dots" role="tablist" aria-label="Hero slides"></div>
+        <div class="hero-dots" id="hero-dots" role="group" aria-label="Hero slides"></div>
         <button id="hero-next" data-icon="chevR" aria-label="Next slide"></button>
       </div>
     </div>
@@ -244,10 +243,12 @@
     <div class="about-media reveal" style="--d:.2s">
       <div class="frame"></div>
       <figure class="main-img">
-        <img src="images/hero/hero-1.webp" alt="Shri Maha Maya Hotel — the front of the hotel at Pallu" loading="lazy" decoding="async" width="1080" height="1460">
+        <img src="images/hero/hero-1.webp" alt="Shri Maha Maya Hotel — the front of the hotel at Pallu" loading="lazy" decoding="async" width="1080" height="1460"
+             srcset="images/hero/hero-1-640.webp 640w, images/hero/hero-1-800.webp 800w, images/hero/hero-1.webp 1080w" sizes="(max-width: 920px) 82vw, 42vw">
       </figure>
       <figure class="side-img">
-        <img src="images/hero/hero-2.webp" alt="The dining hall where every thali is served" loading="lazy" decoding="async" width="1080" height="1440">
+        <img src="images/hero/hero-2.webp" alt="The dining hall where every thali is served" loading="lazy" decoding="async" width="1080" height="1440"
+             srcset="images/hero/hero-2-640.webp 640w, images/hero/hero-2-800.webp 800w, images/hero/hero-2.webp 1080w" sizes="(max-width: 920px) 44vw, 22vw">
       </figure>
       <div class="seal"><span><em>अतिथि</em> देवो भव<br><em>The guest is God</em></span></div>
     </div>
@@ -257,11 +258,12 @@
 <!-- ============ PARALLAX BAND ============ -->
 <section class="parallax-band" aria-label="Hospitality promise">
   <div class="bg" data-parallax="1">
-    <img src="images/hero/hero-2.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" width="1080" height="1440">
+    <img src="images/hero/hero-2.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" width="1080" height="1440"
+         srcset="images/hero/hero-2-640.webp 640w, images/hero/hero-2-800.webp 800w, images/hero/hero-2.webp 1080w" sizes="100vw">
   </div>
   <div class="veil"></div>
   <div class="inner">
-    <h3 class="reveal" data-i18n="band.title">Every journey deserves a rest that feels royal.</h3>
+    <h2 class="reveal" data-i18n="band.title">Every journey deserves a rest that feels royal.</h2>
     <p class="reveal" style="--d:.12s" data-i18n="band.text">Long highway miles end here — with a clean bed, a hot thali and a smile at the door.</p>
     <a href="#rooms" class="btn btn-gold reveal" style="--d:.24s" data-i18n="band.btn">Plan Your Stay</a>
   </div>
@@ -408,11 +410,13 @@
 
         <div class="masonry reveal">
       <figure class="g-item" data-gallery="main" data-full="images/hero/hero-1.webp" data-cap="The Hotel · होटल">
-        <img src="images/hero/hero-1.webp" alt="Hotel front view at Pallu" loading="lazy" decoding="async" style="--ar:3/3.9" width="1080" height="1460">
+        <img src="images/hero/hero-1.webp" alt="Hotel front view at Pallu" loading="lazy" decoding="async" style="--ar:3/3.9" width="1080" height="1460"
+             srcset="images/hero/hero-1-640.webp 640w, images/hero/hero-1-800.webp 800w, images/hero/hero-1.webp 1080w" sizes="(max-width: 620px) 92vw, (max-width: 1100px) 30vw, 24vw">
         <span class="cap">The Hotel</span>
       </figure>
       <figure class="g-item" data-gallery="main" data-full="images/hero/hero-2.webp" data-cap="Dining Hall · भोजन कक्ष">
-        <img src="images/hero/hero-2.webp" alt="Dining hall" loading="lazy" decoding="async" style="--ar:3/4" width="1080" height="1440">
+        <img src="images/hero/hero-2.webp" alt="Dining hall" loading="lazy" decoding="async" style="--ar:3/4" width="1080" height="1440"
+             srcset="images/hero/hero-2-640.webp 640w, images/hero/hero-2-800.webp 800w, images/hero/hero-2.webp 1080w" sizes="(max-width: 620px) 92vw, (max-width: 1100px) 30vw, 24vw">
         <span class="cap">Dining Hall</span>
       </figure>
       <figure class="g-item" data-gallery="main" data-full="images/rooms/room-standard.webp" data-cap="Guest Room · अतिथि कक्ष">
@@ -424,7 +428,8 @@
         <span class="cap">The Thali</span>
       </figure>
       <figure class="g-item" data-gallery="main" data-full="images/hero/hero-3.webp" data-cap="Reception · स्वागत कक्ष">
-        <img src="images/hero/hero-3.webp" alt="Hotel reception" loading="lazy" decoding="async" style="--ar:3/4.4" width="935" height="1683">
+        <img src="images/hero/hero-3.webp" alt="Hotel reception" loading="lazy" decoding="async" style="--ar:3/4.4" width="935" height="1683"
+             srcset="images/hero/hero-3-640.webp 640w, images/hero/hero-3-800.webp 800w, images/hero/hero-3.webp 935w" sizes="(max-width: 620px) 92vw, (max-width: 1100px) 30vw, 24vw">
         <span class="cap">Reception</span>
       </figure>
       <figure class="g-item" data-gallery="main" data-full="images/rooms/room-deluxe.webp" data-cap="Guest Room · अतिथि कक्ष">
@@ -804,8 +809,8 @@
 <script src="assets/js/menu.js?v=6" defer></script>
 <script>window.AGENT_CONFIG={api:"https://shreemahamayahotel.onrender.com",availabilityUrl:"https://script.google.com/macros/s/AKfycbxMPgJz2A-lnudhgkhctjL4FlbXmiivlpl7afj0Bceyf3ikXpvORlNHNE_L80ByqvcxUA/exec"}</script>
 <script src="assets/js/knowledge.js?v=3" defer></script>
-<script src="assets/js/agent.js?v=22" defer></script>
-<script src="assets/js/app.js?v=15" defer></script>
+<script src="assets/js/agent.js?v=25" defer></script>
+<script src="assets/js/app.js?v=17" defer></script>
 <noscript>
   <style>
     .reveal, .hero-eyebrow, .hero-baseline, .hero-sub, .hero-desc, .hero-ctas, .veg-seal, .hero h1 { opacity: 1 !important; transform: none !important; }
