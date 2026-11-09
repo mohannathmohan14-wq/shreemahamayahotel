@@ -26,7 +26,7 @@
 
   const T = {
     agentName:   { en: "Maya Sahayak", hi: "माया सहायक" },
-    role:        { en: "Hotel sales assistant · online · v21", hi: "होटल सहायक · ऑनलाइन · v21" },
+    role:        { en: "Hotel sales assistant · online · v22", hi: "होटल सहायक · ऑनलाइन · v22" },
     fabLabel:    { en: "Hotel Assistance", hi: "सहायता" },
     bkWhen:      { en: "When, and for how many? One line is fine — e.g. \"5 Nov to 6 Nov, 2 people\".", hi: "कब और कितने लोग? एक लाइन में लिखिए — जैसे \"5 नव से 6 नव, 2 लोग\"।" },
     bkContact:   { en: "Perfect. Now your name and mobile in one line — e.g. \"Ram 9876543210\".", hi: "बढ़िया। अब नाम और मोबाइल एक लाइन में — जैसे \"Ram 9876543210\"।" },
@@ -342,11 +342,14 @@
   ];
 
   /* ---------- enquiry submission (backend optional) ---------- */
-  async function saveEnquiry(payload) {
-    if (!window.AGENT_CONFIG.api) return { mode: "whatsapp-only" };
+  const EQ_KEY = "smm_eq_queue";
+  function eqLoad() { try { return JSON.parse(localStorage.getItem(EQ_KEY) || "[]"); } catch (e) { return []; } }
+  function eqPush(p) { try { const q = eqLoad(); q.push(p); localStorage.setItem(EQ_KEY, JSON.stringify(q.slice(-20))); } catch (e) { /* storage unavailable */ } }
+  function eqDrop(i) { try { const q = eqLoad(); q.splice(i, 1); localStorage.setItem(EQ_KEY, JSON.stringify(q)); } catch (e) { /* storage unavailable */ } }
+  async function postEnquiry(payload) {
     try {
       const ctl = typeof AbortController !== "undefined" ? new AbortController() : null;
-      const to = ctl ? setTimeout(() => ctl.abort(), 10000) : null;
+      const to = ctl ? setTimeout(() => ctl.abort(), 20000) : null;   /* Render cold-start ~30-40s: 20s + queue retry */
       const res = await fetch(window.AGENT_CONFIG.api.replace(/\/$/, "") + "/api/enquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -355,11 +358,27 @@
       });
       if (to) clearTimeout(to);
       if (!res.ok) throw new Error("HTTP " + res.status);
-      return { mode: "saved", data: await res.json() };
+      return true;
     } catch (e) {
-      return { mode: "failed" };
+      return false;
     }
   }
+  async function flushEnquiryQueue() {
+    const q = eqLoad();
+    for (let i = 0; i < q.length; i++) {
+      if (await postEnquiry(q[i])) { eqDrop(i); i--; } else break;
+    }
+  }
+  async function saveEnquiry(payload) {
+    if (!window.AGENT_CONFIG.api) return { mode: "whatsapp-only" };
+    if (await postEnquiry(payload)) {
+      setTimeout(flushEnquiryQueue, 300);   /* purani bachi enquiries bhi bhej do */
+      return { mode: "saved" };
+    }
+    eqPush(payload);   /* browser band ho jaye to agli baar khud bhej dega */
+    return { mode: "queued" };
+  }
+  setTimeout(flushEnquiryQueue, 4000);
 
   /* ================= UI ================= */
   const wrap = document.createElement("div");
@@ -416,6 +435,7 @@
     document.getElementById("agent-status").textContent = on ? t("typing") : t("role");
   }
   function bot(text, acts, delay) {
+    cartMsgLive = false;   /* naya bot message -> agla cart update naya bubble lega */
     typing(true);
     setTimeout(() => { typing(false); addMsg("bot", text, acts); }, delay || 420);
   }
@@ -428,7 +448,10 @@
       chipsRow.appendChild(b);
     });
   }
-  const defaultChips = () => setChips(t("chips").map((c) => ({ label: c })).concat([{ label: t("leadChip"), send: "LEAD:start" }]));
+  const defaultChips = () => {
+    if (flow) return;   /* order/booking flow ke beech chips reset nahi hone chahiye */
+    setChips(t("chips").map((c) => ({ label: c })).concat([{ label: t("leadChip"), send: "LEAD:start" }]));
+  };
 
   function openPanel() {
     panel.hidden = false;
@@ -580,6 +603,25 @@
       : (lang === "hi" ? "और क्या चाहिए? श्रेणी चुनिए या लिखिए — हो जाए तो \"बस\" लिखिए:" : "What else? Pick a category or type — write \"done\" when finished:"));
     setChips(catChips().concat([doneChip()]));
   }
+  let cartMsgEl = null, cartMsgLive = false;
+  function showCartBubble(prefix) {
+    const html = (prefix ? prefix + "\n" : "") + cartLines(lang) +
+      `\n💰 ${t("ordTotal")}: ₹${cartTotal().toLocaleString("en-IN")}` +
+      (lang === "hi" ? "\n(+ / − से quantity बदलिए, ✕ से हटाइए)" : "\n(Use + / − to change quantity, ✕ to remove)");
+    if (cartMsgLive && cartMsgEl) {
+      cartMsgEl.innerHTML = `<p>${esc(html).replace(/\n/g, "<br>")}</p>`;
+      msgs.scrollTop = msgs.scrollHeight;
+    } else {
+      cartMsgEl = addMsg("bot", html);
+      cartMsgLive = true;
+    }
+    setChips(cartChips());
+  }
+  function showCartEmpty(text) {
+    if (cartMsgLive && cartMsgEl) cartMsgEl.innerHTML = `<p>${esc(text).replace(/\n/g, "<br>")}</p>`;
+    else { cartMsgEl = addMsg("bot", text); cartMsgLive = true; }
+    setChips(catChips().concat([doneChip()]));
+  }
   function addToCart(list) {
     const found = { explicitQty: list.some((f) => f.explicit) };
     list.forEach(({ it, qty, half }) => {
@@ -589,9 +631,7 @@
       if (ex) { if (found.explicitQty) ex.qty = qty; else ex.qty += qty; }
       else draft.cart.push({ en: it.name.en, hi: it.name.hi, price, qty, half: !!half });
     });
-    bot((lang === "hi" ? "जोड़ दिया ✅\n" : "Added ✅\n") + cartLines(lang) + `\n💰 ${t("ordTotal")}: ₹${cartTotal().toLocaleString("en-IN")}` +
-      (lang === "hi" ? "\n(+ / − से quantity बदलिए, ✕ से हटाइए)" : "\n(Use + / − to change quantity, ✕ to remove)"));
-    setChips(cartChips());
+    showCartBubble(lang === "hi" ? "जोड़ दिया ✅" : "Added ✅");
   }
   function contactStep() {
     flow.step = "contact";
@@ -602,6 +642,7 @@
   function startOrder() {
     flow = { id: "order", step: "add" };
     draft = { type: "food", cart: [] };
+    cartMsgEl = null; cartMsgLive = false;
     askAdd(true);
   }
   async function finishOrder() {
@@ -609,7 +650,7 @@
     const summary = `👤 Name: ${s.name}\n📞 Mobile: ${s.phone}\n🍽 Order:\n${cartLines("en")}\n💰 Total: ₹${cartTotal().toLocaleString("en-IN")}\n📦 Parcel/takeaway (no home delivery)`;
     const waMsg = `Namaste! 🙏 Food order (Maya Sahayak bot se) — Shri Maha Maya Restaurant, Pallu\n${summary}`;
     bot((lang === "hi" ? "Order tayyar! 👇 WhatsApp message bhej dijiye — restaurant ko turant mil jayega:\n" : "Order ready! 👇 Send this WhatsApp message — the restaurant gets it instantly:\n") + summary, actions(waMsg));
-    flow = null; draft = {};
+    flow = null; draft = {}; cartMsgEl = null; cartMsgLive = false;
     saveEnquiry({ name: s.name, phone: s.phone, type: "food", lang, source: "website-agent", details: summary })
       .then((res) => { if (res.mode === "saved") bot(lang === "hi" ? "✅ Dashboard me bhi save ho gaya." : "✅ Also saved to the hotel dashboard."); });
     setTimeout(defaultChips, 800);
@@ -759,10 +800,8 @@
             if (c) {
               c.qty = raw.startsWith("INC:") ? Math.min(20, c.qty + 1) : c.qty - 1;
               if (c.qty <= 0) draft.cart.splice(i, 1);
-              bot((draft.cart || []).length
-                ? (lang === "hi" ? "कार्ट:\n" : "Cart:\n") + cartLines(lang) + `\n💰 ${t("ordTotal")}: ₹${cartTotal().toLocaleString("en-IN")}`
-                : (lang === "hi" ? "कार्ट खाली है — श्रेणी चुनिए:" : "Cart is empty — pick a category:"));
-              setChips((draft.cart || []).length ? cartChips() : catChips().concat([doneChip()]));
+              if ((draft.cart || []).length) showCartBubble(lang === "hi" ? "कार्ट:" : "Cart:");
+              else showCartEmpty(lang === "hi" ? "कार्ट खाली है — श्रेणी चुनिए:" : "Cart is empty — pick a category:");
             }
             return;
           }
@@ -770,11 +809,9 @@
             const i = Number(raw.slice(4));
             if ((draft.cart || [])[i]) {
               const c = draft.cart.splice(i, 1)[0];
-              bot((lang === "hi" ? "हटा दिया ✕ " : "Removed ✕ ") + (lang === "hi" ? c.hi : c.en) +
-                ((draft.cart || []).length
-                  ? "\n" + cartLines(lang) + `\n💰 ${t("ordTotal")}: ₹${cartTotal().toLocaleString("en-IN")}`
-                  : (lang === "hi" ? "\nकार्ट खाली है — श्रेणी चुनिए:" : "\nCart is empty — pick a category:")));
-              setChips((draft.cart || []).length ? cartChips() : catChips().concat([doneChip()]));
+              if ((draft.cart || []).length) showCartBubble((lang === "hi" ? "हटा दिया ✕ " : "Removed ✕ ") + (lang === "hi" ? c.hi : c.en));
+              else showCartEmpty((lang === "hi" ? "हटा दिया ✕ " : "Removed ✕ ") + (lang === "hi" ? c.hi : c.en) +
+                (lang === "hi" ? "\nकार्ट खाली है — श्रेणी चुनिए:" : "\nCart is empty — pick a category:"));
             }
             return;
           }
@@ -935,5 +972,5 @@
     if (opened && !msgs.children.length) addMsg("bot", t("greeting"));
   });
 
-  window.SMM_AGENT = { open: openPanel, handle, version: "21" };
+  window.SMM_AGENT = { open: openPanel, handle, version: "22" };
 })();
