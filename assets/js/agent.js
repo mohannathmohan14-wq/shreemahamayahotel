@@ -26,7 +26,7 @@
 
   const T = {
     agentName:   { en: "Maya Sahayak", hi: "माया सहायक" },
-    role:        { en: "Hotel sales assistant · online · v20", hi: "होटल सहायक · ऑनलाइन · v20" },
+    role:        { en: "Hotel sales assistant · online · v21", hi: "होटल सहायक · ऑनलाइन · v21" },
     fabLabel:    { en: "Hotel Assistance", hi: "सहायता" },
     bkWhen:      { en: "When, and for how many? One line is fine — e.g. \"5 Nov to 6 Nov, 2 people\".", hi: "कब और कितने लोग? एक लाइन में लिखिए — जैसे \"5 नव से 6 नव, 2 लोग\"।" },
     bkContact:   { en: "Perfect. Now your name and mobile in one line — e.g. \"Ram 9876543210\".", hi: "बढ़िया। अब नाम और मोबाइल एक लाइन में — जैसे \"Ram 9876543210\"।" },
@@ -561,11 +561,18 @@
     label: lang === "hi" ? (MENU[k].title.hi || MENU[k].title.en) : MENU[k].title.en, send: "CAT:" + k,
   }));
   const itemChips = (key) => catItems(key).map((d, i) => ({
-    label: `${lang === "hi" ? d.name.hi : d.name.en} · ${rupees(d.price)}`, send: `ADD:${key}:${i}`,
+    label: `${lang === "hi" ? d.name.hi : d.name.en} · ${rupees(d.price)}`, send: `OPT:${key}:${i}`,
   })).concat([{ label: lang === "hi" ? "← श्रेणियाँ" : "← Categories", send: "CAT:list" }, doneChip()]);
-  const cartChips = () => (draft.cart || []).map((c, i) => ({
-    label: `✕ ${lang === "hi" ? c.hi : c.en}`, send: "REM:" + i,
-  })).concat([{ label: lang === "hi" ? "➕ और जोड़ें" : "➕ Add more", send: "CAT:list" }, doneChip()]);
+  const cartChips = () => {
+    const out = [];
+    (draft.cart || []).forEach((c, i) => {
+      const nm = `${lang === "hi" ? c.hi : c.en}${c.half ? (lang === "hi" ? " (हाफ)" : " (half)") : ""}`;
+      out.push({ label: `− ${nm}`, send: "DEC:" + i });
+      out.push({ label: `+ ${nm}`, send: "INC:" + i });
+      out.push({ label: `✕ ${nm}`, send: "REM:" + i });
+    });
+    return out.concat([{ label: lang === "hi" ? "➕ और जोड़ें" : "➕ Add more", send: "CAT:list" }, doneChip()]);
+  };
   function askAdd(first) {
     bot(first
       ? (lang === "hi" ? "पैक/पार्सल बिल्कुल हो जाएगा! 😊 (होम डिलीवरी नहीं।) पहले नीचे श्रेणी चुनिए — टैप करते ही आइटम बटन के रूप में आ जाएँगे। चाहें तो लिख दीजिए — जैसे \"2 थाली, 1 कड़ाही पनीर हाफ\"। पनीर व मसाला फुल/हाफ मिलते हैं।"
@@ -583,7 +590,7 @@
       else draft.cart.push({ en: it.name.en, hi: it.name.hi, price, qty, half: !!half });
     });
     bot((lang === "hi" ? "जोड़ दिया ✅\n" : "Added ✅\n") + cartLines(lang) + `\n💰 ${t("ordTotal")}: ₹${cartTotal().toLocaleString("en-IN")}` +
-      (lang === "hi" ? "\n(किसी आइटम को हटाने के लिए उसका ✕ बटन दबाइए)" : "\n(Tap an item's ✕ button to remove it)"));
+      (lang === "hi" ? "\n(+ / − से quantity बदलिए, ✕ से हटाइए)" : "\n(Use + / − to change quantity, ✕ to remove)"));
     setChips(cartChips());
   }
   function contactStep() {
@@ -723,6 +730,41 @@
                 (lang === "hi" ? " — आइटम बटन पर टैप करके कार्ट में डालिए:" : " — tap an item button to add it to your cart:"));
               setChips(itemChips(k)); return;
             }
+          }
+          if (raw.startsWith("OPT:")) {
+            const p = raw.split(":");
+            const it = catItems(p[1]) ? catItems(p[1])[Number(p[2])] : null;
+            if (it) {
+              const hp = halfPriceOf(it);
+              const full = Number(String(it.price).replace(/\D/g, "")) || 0;
+              const nm = lang === "hi" ? it.name.hi : it.name.en;
+              bot(`${nm} — ` + (hp
+                ? (lang === "hi" ? `Full ₹${full} / Half ₹${hp}। चुनिए:` : `Full ₹${full} / Half ₹${hp}. Pick one:`)
+                : (lang === "hi" ? `₹${full}। कार्ट में डालें?` : `₹${full}. Add to cart?`)));
+              const ch = [{ label: `➕ Full ₹${full}`, send: `ADDH:${p[1]}:${p[2]}:full` }];
+              if (hp) ch.push({ label: `➕ Half ₹${hp}`, send: `ADDH:${p[1]}:${p[2]}:half` });
+              ch.push({ label: lang === "hi" ? "← आइटम" : "← Items", send: "CAT:" + p[1] });
+              setChips(ch); return;
+            }
+          }
+          if (raw.startsWith("ADDH:")) {
+            const p = raw.split(":");
+            const it = catItems(p[1]) ? catItems(p[1])[Number(p[2])] : null;
+            if (it) addToCart([{ it, qty: 1, half: p[3] === "half" }]);
+            return;
+          }
+          if (raw.startsWith("INC:") || raw.startsWith("DEC:")) {
+            const i = Number(raw.slice(4));
+            const c = (draft.cart || [])[i];
+            if (c) {
+              c.qty = raw.startsWith("INC:") ? Math.min(20, c.qty + 1) : c.qty - 1;
+              if (c.qty <= 0) draft.cart.splice(i, 1);
+              bot((draft.cart || []).length
+                ? (lang === "hi" ? "कार्ट:\n" : "Cart:\n") + cartLines(lang) + `\n💰 ${t("ordTotal")}: ₹${cartTotal().toLocaleString("en-IN")}`
+                : (lang === "hi" ? "कार्ट खाली है — श्रेणी चुनिए:" : "Cart is empty — pick a category:"));
+              setChips((draft.cart || []).length ? cartChips() : catChips().concat([doneChip()]));
+            }
+            return;
           }
           if (raw.startsWith("REM:")) {
             const i = Number(raw.slice(4));
@@ -893,5 +935,5 @@
     if (opened && !msgs.children.length) addMsg("bot", t("greeting"));
   });
 
-  window.SMM_AGENT = { open: openPanel, handle, version: "20" };
+  window.SMM_AGENT = { open: openPanel, handle, version: "21" };
 })();
