@@ -945,6 +945,24 @@ section { scroll-margin-top: calc(var(--nav-h) + 8px); }
   flex: none; font-size: 0.76rem; padding: 8px 13px; border-radius: 999px; cursor: pointer;
   border: 1px solid var(--gold-line); background: #fff; color: var(--maroon-800); font-weight: 500;
 }
+.agent-step {
+  flex: none; display: flex; align-items: stretch; overflow: hidden;
+  border: 1px solid var(--gold-line); border-radius: 999px; background: #fff;
+}
+.agent-step .st-btn {
+  flex: none; width: 42px; min-height: 42px; padding: 0; border: 0; border-radius: 0;
+  background: transparent; color: var(--maroon-800); font-size: 1.1rem; font-weight: 700; line-height: 1; cursor: pointer;
+}
+.agent-step .st-btn:first-child { border-right: 1px solid rgba(185, 138, 62, 0.28); }
+.agent-step .st-btn:last-child { border-left: 1px solid rgba(185, 138, 62, 0.28); }
+.agent-step .st-name {
+  align-self: center; max-width: 150px; padding: 0 4px; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; font-size: 0.76rem; font-weight: 600; color: var(--maroon-800);
+}
+.agent-chips button.agent-x {
+  flex: none; width: 42px; min-height: 42px; padding: 0; border-radius: 50%;
+  border: 1px solid rgba(146, 44, 44, 0.45); background: #fff; color: #922c2c; font-size: 0.95rem; cursor: pointer;
+}
 .agent-input { display: flex; gap: 8px; padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); background: #fff; border-top: 1px solid rgba(185, 138, 62, 0.25); }
 .agent-input input {
   flex: 1; border: 1px solid rgba(185, 138, 62, 0.4); border-radius: 999px;
