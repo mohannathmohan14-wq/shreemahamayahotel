@@ -7,9 +7,9 @@
 
 /* ---------- Config (owner: edit phone & WhatsApp here) ---------- */
 const CONFIG = {
-  phone: "9950501306",
-  phoneDisplay: "+91 99505 01306 · +91 96604 01306",
-  whatsapp: "919950501306",
+  phone: "8107301306",
+  phoneDisplay: "+91 81073 01306 · +91 96604 01306",
+  whatsapp: "918107301306",
   email: "shreemahamayahotel@gmail.com",
 };
 

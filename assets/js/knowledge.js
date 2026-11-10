@@ -20,9 +20,9 @@ window.KB = {
   },
 
   contact: {
-    phonePrimary: "+91 99505 01306",  phonePrimaryRaw: "9950501306",
+    phonePrimary: "+91 81073 01306",  phonePrimaryRaw: "8107301306",
     phoneSecondary: "+91 96604 01306", phoneSecondaryRaw: "9660401306",
-    whatsapp: "919950501306",
+    whatsapp: "918107301306",
     email: "shreemahamayahotel@gmail.com",
     address: "Main Highway, near Indian Oil Fuel Station, Pallu, Hanumangarh, Rajasthan 335522",
     addressHi: "मेन हाईवे, इंडियन ऑयल फ्यूल स्टेशन के पास, पल्लू, हनुमानगढ़, राजस्थान 335522",

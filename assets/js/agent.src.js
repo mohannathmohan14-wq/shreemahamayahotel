@@ -26,7 +26,7 @@
 
   const T = {
     agentName:   { en: "Maya Sahayak", hi: "माया सहायक" },
-    role:        { en: "Hotel sales assistant · online · v25", hi: "होटल सहायक · ऑनलाइन · v25" },
+    role:        { en: "Hotel sales assistant · online · v28", hi: "होटल सहायक · ऑनलाइन · v28" },
     fabLabel:    { en: "Hotel Assistance", hi: "सहायता" },
     bkWhen:      { en: "When, and for how many? One line is fine — e.g. \"5 Nov to 6 Nov, 2 people\".", hi: "कब और कितने लोग? एक लाइन में लिखिए — जैसे \"5 नव से 6 नव, 2 लोग\"।" },
     bkContact:   { en: "Perfect. Now your name and mobile in one line — e.g. \"Ram 9876543210\".", hi: "बढ़िया। अब नाम और मोबाइल एक लाइन में — जैसे \"Ram 9876543210\"।" },
@@ -199,7 +199,7 @@
   async function vacancyAnswer() {
     const chips = [
       { label: lang === "hi" ? "कमरा बुक करें" : "Book a room", send: "ROOM:start" },
-      { label: lang === "hi" ? "होटल को कॉल करें" : "Call the hotel", href: "tel:+919950501306" },
+      { label: lang === "hi" ? "होटल को कॉल करें" : "Call the hotel", href: "tel:+918107301306" },
     ];
     const CFG0 = window.AGENT_CONFIG || {};
     const urls = [];
@@ -252,12 +252,18 @@
       (lang === "hi" ? "\nकिस कमरे की जानकारी चाहिए?" : "\nWhich room shall I tell you about?");
   }
   const TAB_ALIAS = {
-    "tab-thali": ["thali", "special"],
     "tab-paneer": ["paneer", "panir", "pneer"],
-    "tab-masala": ["masala", "massala", "sabzi", "subzi", "curry"],
-    "tab-dahichawal": ["dahi", "rice", "chawal", "curd", "raita", "pulao", "lassi"],
-    "tab-roti": ["roti", "parantha", "paratha", "naan", "kulcha", "missi"],
-    "tab-fastfood": ["fast food", "fastfood", "fast-food", "snacks", "pakora", "pakoda", "maggi", "chai", "coffee", "burger", "pizza"],
+    "tab-masala": ["masala", "massala", "sabzi", "subzi", "sabji", "curry"],
+    "tab-dal": ["dal", "daal"],
+    "tab-rice": ["rice", "chawal", "pulao"],
+    "tab-special": ["special", "thali", "chutney", "chatni", "mahamaya"],
+    "tab-beverages": ["beverage", "beverages", "drink", "drinks", "chai", "tea", "coffee", "lassi", "milk", "doodh", "chhachh", "buttermilk", "lemon", "sharbat"],
+    "tab-salad": ["salad", "salads"],
+    "tab-prantha": ["parantha", "paratha", "prantha", "parathe"],
+    "tab-fastfood": ["fast food", "fastfood", "fast-food", "snacks", "pakora", "pakoda", "maggi", "chips", "chat", "peanut", "burger", "pizza"],
+    "tab-papad": ["papad", "papar"],
+    "tab-roti": ["roti", "tandoori", "tawa", "missi", "naan", "kulcha"],
+    "tab-dahi": ["dahi", "raita", "rayta", "curd", "yogurt"],
   };
   function findTab(q) {
     /* sirf tab-lookup jab query basically sirf category-naam ho —
@@ -444,6 +450,31 @@
     chipsTouched = true;
     chipsRow.innerHTML = "";
     (list || []).forEach((c) => {
+      if (c.step) {
+        /* v28 owner-sketch design: ek pill ke andar − naam + ; ✕ alag round button */
+        const g = document.createElement("div");
+        g.className = "agent-step";
+        const mk = (sym, send, aria) => {
+          const b = document.createElement("button");
+          b.type = "button"; b.className = "st-btn"; b.textContent = sym;
+          b.setAttribute("aria-label", aria);
+          b.onclick = () => { chipsRow.innerHTML = ""; handle(send, "", true); };
+          return b;
+        };
+        const nmEl = document.createElement("span");
+        nmEl.className = "st-name";
+        nmEl.textContent = c.step.name + (c.step.qty > 1 ? " ×" + c.step.qty : "");
+        g.appendChild(mk("−", "DEC:" + c.step.i, (lang === "hi" ? "मात्रा घटाएँ: " : "Decrease: ") + c.step.name));
+        g.appendChild(nmEl);
+        g.appendChild(mk("+", "INC:" + c.step.i, (lang === "hi" ? "मात्रा बढ़ाएँ: " : "Increase: ") + c.step.name));
+        chipsRow.appendChild(g);
+        const x = document.createElement("button");
+        x.type = "button"; x.className = "agent-x"; x.textContent = "✕";
+        x.setAttribute("aria-label", (lang === "hi" ? "हटाएँ: " : "Remove: ") + c.step.name);
+        x.onclick = () => { chipsRow.innerHTML = ""; handle("REM:" + c.step.i, "", true); };
+        chipsRow.appendChild(x);
+        return;
+      }
       const b = document.createElement("button");
       b.type = "button"; b.textContent = c.label;
       b.onclick = () => { chipsRow.innerHTML = ""; handle(c.send || c.label, c.label, NO_ECHO.test(c.send || "")); };
@@ -604,9 +635,7 @@
     const out = [];
     (draft.cart || []).forEach((c, i) => {
       const nm = `${lang === "hi" ? c.hi : c.en}${c.half ? (lang === "hi" ? " (हाफ)" : " (half)") : ""}`;
-      out.push({ label: `− ${nm}`, send: "DEC:" + i });
-      out.push({ label: `+ ${nm}`, send: "INC:" + i });
-      out.push({ label: `✕ ${nm}`, send: "REM:" + i });
+      out.push({ step: { i, name: nm, qty: c.qty || 1 } });
     });
     return out.concat([{ label: lang === "hi" ? "➕ और जोड़ें" : "➕ Add more", send: "CAT:list" }, doneChip()]);
   };
@@ -717,8 +746,13 @@
         flow.step = "full";
         bot(recHits(which));
         if (which !== "both") {
-          setTimeout(() => bot(catFull(which === "paneer" ? "tab-paneer" : "tab-masala") +
-            (lang === "hi" ? "\nऔर श्रेणियाँ: थाली स्पेशल, दही व चावल, रोटी व परांठा, फास्ट फूड।" : "\nOther categories: Thali Special, Dahi & Rice, Roti & Parantha, Fast Food.")), 700);
+          setTimeout(() => {
+            const shownKey = which === "paneer" ? "tab-paneer" : "tab-masala";
+            const others = Object.keys(MENU).filter((k) => k !== shownKey).slice(0, 4)
+              .map((k) => (lang === "hi" ? MENU[k].title.hi : MENU[k].title.en));
+            bot(catFull(shownKey) +
+              (lang === "hi" ? `\nऔर श्रेणियाँ: ${others.join(", ")}… "पूरा मेनू देखें" दबाइए।` : `\nOther categories: ${others.join(", ")}… tap "See complete menu".`));
+          }, 700);
         }
         setChips([
           { label: lang === "hi" ? "पूरा मेनू देखें" : "See complete menu", send: "REC:full" },
@@ -989,5 +1023,5 @@
     if (opened && !msgs.children.length) addMsg("bot", t("greeting"));
   });
 
-  window.SMM_AGENT = { open: openPanel, handle, version: "25" };
+  window.SMM_AGENT = { open: openPanel, handle, version: "28" };
 })();
