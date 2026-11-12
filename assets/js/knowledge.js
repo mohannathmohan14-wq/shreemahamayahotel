@@ -54,7 +54,7 @@ window.KB = {
 
   hours: {
     frontDesk: "24×7",  frontDeskHi: "24×7 खुला",
-    restaurant: "6:00 AM – 1:30 AM", restaurantHi: "सुबह 6:00 बजे से रात 1:30 बजे तक",
+    restaurant: "6:00 AM – 12:30 AM", restaurantHi: "सुबह 6:00 बजे से रात 12:30 बजे तक",
     roomService: "24×7", roomServiceHi: "24×7",
   },
 
@@ -96,8 +96,8 @@ window.KB = {
       a: "Yes, free parking at the hotel.",
       aHi: "जी हाँ, होटल पर मुफ़्त पार्किंग है।" },
     { q: "Do you deliver or parcel food?", qHi: "खाना पार्सल या डिलीवरी होती है?",
-      a: "No home delivery. Parcel/takeaway is available at the restaurant (6:00 AM – 1:30 AM).",
-      aHi: "होम डिलीवरी नहीं। रेस्टोरेंट से पार्सल/टेकअवे मिलता है (सुबह 6:00 – रात 1:30)।" },
+      a: "No home delivery. Parcel/takeaway is available at the restaurant (6:00 AM – 12:30 AM).",
+      aHi: "होम डिलीवरी नहीं। रेस्टोरेंट से पार्सल/टेकअवे मिलता है (सुबह 6:00 – रात 12:30)।" },
     { q: "Which ID is needed at check-in?", qHi: "चेक-इन पर कौन-सी आईडी लगती है?",
       a: "Any one government photo ID: Aadhaar, Driving Licence or Voter ID.",
       aHi: "कोई एक सरकारी फोटो आईडी: आधार, ड्राइविंग लाइसेंस या वोटर आईडी।" },
