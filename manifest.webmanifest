@@ -1,0 +1,15 @@
+{
+  "name": "Shri Maha Maya Hotel & Restaurant, Pallu",
+  "short_name": "Shri Maha Maya",
+  "description": "Pure-veg hotel & restaurant on the highway at Pallu, Hanumangarh. AC rooms from ₹1,000, Rajasthani thali, 24×7 front desk.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#5E1628",
+  "theme_color": "#5E1628",
+  "lang": "en-IN",
+  "icons": [
+    { "src": "/assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

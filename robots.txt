@@ -1,3 +1,18 @@
 User-agent: *
 Allow: /
+
+# AI assistants / GEO-AEO crawlers — allowed (owner policy 2026-11-10)
+User-agent: GPTBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+
 Sitemap: https://shreemahamayahotelpallu.netlify.app/sitemap.xml
